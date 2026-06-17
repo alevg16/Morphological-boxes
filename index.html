@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design record — Morphological boxes · VG Engineering</title>
-<meta name="description" content="A VG Engineering working tool: build morphological boxes, keep every design in one record, trace 3–4 solution paths per problem, and hand any box to a client. Static, self-hostable on GitHub Pages.">
+<title>Design record — VG Engineering tools</title>
+<meta name="description" content="VG Engineering working tools: morphological boxes for concept generation and Pugh decision matrices with sensitivity analysis for choosing between them. One record, autosaved, exportable, self-hostable on GitHub Pages.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
     --navy:#0E2A4A; --navy-deep:#081B33; --ink:#0B0E13; --paper:#FFFFFF;
     --paper-dim:#F5F7FA; --hairline:#D7DEE7; --steel:#5A7491; --focus:#1B4F8A;
     --pA:#0E2A4A; --pB:#1F6E7A; --pC:#B5712A; --pD:#5B5470;
+    --teal:#1F6E7A; --pos:#2E7D52; --neg:#B5462C;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
@@ -35,10 +36,13 @@
   .btn:hover{background:var(--navy);color:var(--paper);}
   .btn.solid{background:var(--navy);color:var(--paper);}
   .btn.solid:hover{background:var(--navy-deep);}
+  .btn.teal{border-color:var(--teal);color:var(--teal);}
+  .btn.teal:hover{background:var(--teal);color:#fff;}
+  .btn.teal.solid{background:var(--teal);color:#fff;}
   .btn.ghost{border-color:var(--hairline);color:var(--steel);}
   .btn.ghost:hover{background:var(--paper-dim);color:var(--navy);border-color:var(--steel);}
+  .btn.sm{padding:5px 9px;font-size:11px;}
 
-  /* ---- storage banner ---- */
   .storebar{display:none;background:#FBEFE3;border-bottom:1px solid #E7C9A6;color:#7A4E1E;padding:10px 40px;font-size:13px;}
   .storebar.show{display:block;}
   .savedtag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.04em;}
@@ -46,32 +50,40 @@
   /* ===================== LIBRARY ===================== */
   .page-head{padding:54px 40px 30px;border-bottom:1px solid var(--hairline);}
   .page-head h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(30px,4.4vw,46px);line-height:1.05;max-width:20ch;}
-  .page-head .lede{margin-top:16px;max-width:66ch;font-size:17px;color:#27313D;}
+  .page-head .lede{margin-top:16px;max-width:68ch;font-size:17px;color:#27313D;}
   .page-head .lede strong{color:var(--ink);}
-  .libactions{padding:20px 40px;border-bottom:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .libactions{padding:18px 40px;border-bottom:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
   .libactions .grow{flex:1 1 auto;}
-  .liblist{padding:30px 40px 50px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+  .filtertabs{padding:14px 40px;border-bottom:1px solid var(--hairline);display:flex;gap:8px;}
+  .ftab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--hairline);background:var(--paper);color:var(--steel);padding:6px 11px;cursor:pointer;}
+  .ftab.active{border-color:var(--navy);color:var(--navy);}
+  .liblist{padding:26px 40px 46px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
   .bxcard{border:1px solid var(--hairline);border-top:3px solid var(--navy);display:flex;flex-direction:column;}
-  .bxcard .bxbody{padding:16px 18px 10px;flex:1 1 auto;}
+  .bxcard.matrix{border-top-color:var(--teal);}
+  .bxcard .bxbody{padding:15px 18px 10px;flex:1 1 auto;}
+  .bxcard .kind{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--navy);padding:2px 7px;display:inline-block;margin-bottom:9px;}
+  .bxcard.matrix .kind{background:var(--teal);}
   .bxcard .bxname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--ink);line-height:1.2;}
   .bxcard .bxclient{margin-top:4px;font-size:14px;color:var(--steel);}
-  .bxcard .bxmeta{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.03em;}
-  .bxcard .bxacts{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--hairline);}
+  .bxcard .bxmeta{margin-top:11px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.03em;line-height:1.5;}
+  .bxcard .bxacts{display:flex;flex-wrap:wrap;border-top:1px solid var(--hairline);}
   .bxcard .bxacts button{flex:1 1 auto;border:none;border-right:1px solid var(--hairline);background:var(--paper);color:var(--navy);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.03em;padding:9px 6px;cursor:pointer;}
   .bxcard .bxacts button:last-child{border-right:none;}
   .bxcard .bxacts button:hover{background:var(--paper-dim);}
   .bxcard .bxacts button.danger:hover{background:#FBEDEC;color:#C0392B;}
-  .libempty{padding:50px 40px;color:var(--steel);font-size:15px;max-width:60ch;}
+  .libempty{padding:46px 40px;color:var(--steel);font-size:15px;max-width:60ch;}
   .helpnote{margin:0 40px 40px;border:1px solid var(--hairline);border-left:3px solid var(--navy);background:var(--paper-dim);padding:18px 22px;max-width:760px;}
   .helpnote .label{display:block;margin-bottom:7px;color:var(--navy);}
   .helpnote p{font-size:14px;color:#27313D;}
   .helpnote p + p{margin-top:8px;}
   .helpnote code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#fff;border:1px solid var(--hairline);padding:1px 5px;}
 
-  /* ===================== EDITOR ===================== */
-  .crumb{padding:14px 40px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  /* ===================== EDITOR SHELL ===================== */
+  .crumb{padding:14px 40px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
   .crumb .back{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;color:var(--navy);background:none;border:none;cursor:pointer;}
   .crumb .back:hover{text-decoration:underline;text-underline-offset:4px;}
+  .crumb .kindtag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--navy);padding:2px 8px;}
+  .crumb .kindtag.matrix{background:var(--teal);}
   .crumb .grow{flex:1 1 auto;}
 
   .sharedbanner{display:none;background:var(--navy);color:#fff;padding:14px 40px;align-items:center;gap:16px;flex-wrap:wrap;}
@@ -88,13 +100,17 @@
   .ed:empty:before{content:attr(data-ph);color:#A9B4C2;}
   .ed:focus{background:#FBFCFE;box-shadow:inset 0 -2px 0 var(--navy);}
 
-  .note{margin:22px 40px 0;border:1px solid var(--hairline);border-left:3px solid var(--navy);background:var(--paper-dim);padding:18px 22px;max-width:760px;}
+  .note{margin:22px 40px 0;border:1px solid var(--hairline);border-left:3px solid var(--navy);background:var(--paper-dim);padding:18px 22px;max-width:780px;}
+  .note.teal{border-left-color:var(--teal);}
   .note .label{display:block;margin-bottom:7px;color:var(--navy);}
+  .note.teal .label{color:var(--teal);}
   .note p{font-size:14.5px;color:#27313D;}
   .note p + p{margin-top:9px;}
 
   .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 40px;border-bottom:1px solid var(--hairline);border-top:1px solid var(--hairline);margin-top:22px;background:var(--paper);position:sticky;top:0;z-index:6;}
   .toolbar .tlabel{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);}
+
+  /* ---- box bits ---- */
   .pathtabs{display:flex;flex-wrap:wrap;gap:8px;}
   .ptab{display:flex;align-items:center;gap:7px;border:1px solid var(--hairline);background:var(--paper);padding:6px 9px 6px 7px;cursor:pointer;user-select:none;}
   .ptab.active{border-color:var(--navy);}
@@ -103,10 +119,8 @@
   .ptab .pname:focus{box-shadow:inset 0 -2px 0 currentColor;}
   .ptab .prm{border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:13px;line-height:1;padding:0 1px;}
   .ptab .prm:hover{color:#C0392B;}
-
   .designspace{padding:12px 40px;background:#FBFCFE;border-bottom:1px solid var(--hairline);font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--steel);letter-spacing:.02em;}
   .designspace b{color:var(--navy);}
-
   .box{padding:14px 40px 16px;}
   .row{display:flex;align-items:stretch;border:1px solid var(--hairline);border-top:none;}
   .row.first{border-top:1px solid var(--hairline);}
@@ -135,7 +149,6 @@
   .addrow-wrap{padding:0 40px 8px;}
   .addrow{width:100%;border:1px dashed var(--hairline);background:none;color:var(--steel);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:11px;}
   .addrow:hover{border-color:var(--navy);color:var(--navy);}
-
   .summary{padding:40px 40px 20px;border-top:1px solid var(--hairline);margin-top:18px;}
   .summary .label{display:block;margin-bottom:6px;}
   .summary h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.1;color:var(--ink);}
@@ -156,13 +169,79 @@
   .pcard .rationale textarea{width:100%;border:1px solid var(--hairline);background:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);padding:8px 9px;resize:vertical;min-height:62px;line-height:1.45;outline:none;}
   .pcard .rationale textarea:focus{border-color:var(--navy);}
 
+  /* ---- matrix bits ---- */
+  .scaletoggle{display:flex;gap:6px;}
+  .scaletoggle button{font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px solid var(--hairline);background:var(--paper);color:var(--steel);padding:6px 10px;cursor:pointer;}
+  .scaletoggle button.active{border-color:var(--teal);color:var(--teal);background:#F1F7F8;}
+  .mxscroll{padding:14px 40px 6px;overflow-x:auto;}
+  table.mx{border-collapse:collapse;width:100%;min-width:560px;}
+  table.mx th,table.mx td{border:1px solid var(--hairline);padding:8px 10px;vertical-align:middle;text-align:center;}
+  table.mx thead th{background:#FBFCFE;}
+  table.mx .corner{text-align:left;width:230px;background:var(--paper-dim);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);}
+  table.mx .wcol{width:74px;}
+  table.mx .cncell{min-width:120px;}
+  table.mx .cnname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);outline:none;line-height:1.2;}
+  table.mx .cnname:empty:before{content:'Concept';color:#A9B4C2;}
+  table.mx .cnname:focus{box-shadow:inset 0 -2px 0 var(--teal);}
+  table.mx .cnctl{margin-top:5px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  table.mx .cnctl label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--steel);display:flex;align-items:center;gap:4px;cursor:pointer;}
+  table.mx .cnrm{border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:14px;}
+  table.mx .cnrm:hover{color:#C0392B;}
+  table.mx .critname{text-align:left;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;}
+  table.mx .critname:empty:before{content:'Criterion';color:#A9B4C2;}
+  table.mx .critname:focus{box-shadow:inset 0 -2px 0 var(--teal);}
+  table.mx td.critcell{text-align:left;}
+  table.mx td.critcell .critrm{float:right;border:none;background:none;color:#C9D2DC;cursor:pointer;font-size:13px;margin-left:6px;}
+  table.mx td.critcell .critrm:hover{color:#C0392B;}
+  table.mx input.w{width:52px;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center;border:1px solid var(--hairline);padding:4px;outline:none;}
+  table.mx input.w:focus{border-color:var(--teal);}
+  table.mx td.score{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:15px;user-select:none;}
+  table.mx td.score:hover{background:#F1F7F8;}
+  table.mx td.score.pos{color:var(--pos);background:rgba(46,125,82,.08);}
+  table.mx td.score.neg{color:var(--neg);background:rgba(181,70,44,.08);}
+  table.mx td.score.zero{color:var(--steel);}
+  table.mx td.datum{background:repeating-linear-gradient(45deg,#F5F7FA,#F5F7FA 6px,#EEF2F6 6px,#EEF2F6 12px);color:#A9B4C2;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;}
+  table.mx tfoot td{font-family:'IBM Plex Mono',monospace;}
+  table.mx tfoot .frow td{border-top:1.5px solid var(--steel);}
+  table.mx tfoot .flabel{text-align:left;color:var(--steel);font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+  table.mx tfoot .total{font-size:15px;color:var(--ink);font-weight:500;}
+  table.mx tfoot .leader{background:rgba(31,110,122,.12);color:var(--teal);}
+  table.mx tfoot .rank{color:var(--steel);font-size:12px;}
+  table.mx tfoot .rank .badge{color:var(--teal);font-weight:600;}
+  .mxbtns{padding:4px 40px 0;display:flex;gap:10px;flex-wrap:wrap;}
+  .mxhint{padding:6px 40px 0;font-size:12.5px;color:var(--steel);}
+
+  .recblock{padding:30px 40px 6px;}
+  .recblock .label{display:block;margin-bottom:7px;color:var(--teal);}
+  .recblock textarea{width:100%;max-width:780px;border:1px solid var(--hairline);background:#FBFCFE;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;color:var(--ink);padding:11px 13px;resize:vertical;min-height:80px;line-height:1.5;outline:none;}
+  .recblock textarea:focus{border-color:var(--teal);}
+
+  .sens{padding:14px 40px 30px;}
+  .sens .label{display:block;margin-bottom:6px;color:var(--teal);}
+  .sens h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(20px,2.6vw,26px);line-height:1.12;color:var(--ink);}
+  .sens .panel{margin-top:16px;border:1px solid var(--hairline);max-width:780px;}
+  .sens .line{padding:12px 16px;border-bottom:1px solid var(--hairline);font-size:14px;color:#27313D;}
+  .sens .line:last-child{border-bottom:none;}
+  .sens .line .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);display:block;margin-bottom:5px;}
+  .sens .line b{color:var(--ink);}
+  .sens .bars{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+  .sens .bar{display:grid;grid-template-columns:130px 1fr 48px;align-items:center;gap:10px;font-size:13px;}
+  .sens .bar .nm{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sens .bar .track{height:12px;background:var(--paper-dim);border:1px solid var(--hairline);position:relative;}
+  .sens .bar .fill{height:100%;background:var(--teal);}
+  .sens .bar .pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);text-align:right;}
+  .sens .verdict{padding:13px 16px;font-size:14px;}
+  .sens .verdict.robust{background:rgba(46,125,82,.08);color:#1F5B3A;}
+  .sens .verdict.mod{background:rgba(181,113,44,.1);color:#7A4E1E;}
+  .sens .verdict.fragile{background:rgba(181,70,44,.1);color:#7A2E1E;}
+
   footer{background:var(--navy);color:#C8D4E2;padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:13px;}
   footer .label{color:#9FB3C9;}
   footer a{color:#C8D4E2;text-decoration:none;}
   footer a:hover{text-decoration:underline;text-underline-offset:4px;}
 
   @media(max-width:860px){
-    header,.page-head,.libactions,.liblist,.crumb,.toolbar,.box,.addrow-wrap,.summary,footer,.designspace,.sharedbanner,.storebar{padding-left:20px;padding-right:20px;}
+    header,.page-head,.libactions,.filtertabs,.liblist,.crumb,.toolbar,.box,.addrow-wrap,.summary,footer,.designspace,.sharedbanner,.storebar,.mxscroll,.mxbtns,.mxhint,.recblock,.sens{padding-left:20px;padding-right:20px;}
     .helpnote,.note{margin-left:20px;margin-right:20px;}
     .tb-cell{padding-left:20px;padding-right:20px;}
     .titleblock{grid-template-columns:1fr;}
@@ -171,20 +250,24 @@
     .param{width:auto;flex:1 1 100%;border-right:none;border-bottom:1px solid var(--hairline);}
     .rownum{width:100%;height:26px;justify-content:flex-start;padding-left:12px;border-right:none;border-bottom:1px solid var(--hairline);}
     .rowrm{width:100%;height:28px;border-left:none;border-top:1px solid var(--hairline);}
+    .sens .bar{grid-template-columns:96px 1fr 44px;}
   }
 
   @media print{
     body{background:#fff;font-size:11px;}
     .sheet{border:none;max-width:none;}
     .toolbar,.rowrm,.opt .orm,.opt .dot,.addopt,.addrow-wrap,.note,.btn,.ptab .prm,
-    .crumb .back,.storebar,.sharedbanner,.libactions{display:none!important;}
+    .crumb .back,.storebar,.sharedbanner,.libactions,.filtertabs,.mxbtns,.mxhint,
+    table.mx .cnrm,table.mx .critcell .critrm,.scaletoggle{display:none!important;}
     header{position:static;} .toolbar{display:none!important;}
     .crumb{border-bottom:none;padding-top:0;}
     .box{padding:6px 20px;}
     .opt{padding:3px 6px;}
     .opt.sel{box-shadow:none;border:2px solid var(--ink)!important;}
-    .summary{padding:20px;}
-    .pcard .rationale textarea{border:none;padding:0;}
+    .summary,.sens,.recblock{padding:16px 20px;}
+    .mxscroll{overflow:visible;padding:8px 20px;}
+    .pcard .rationale textarea,.recblock textarea{border:none;padding:0;background:none;}
+    table.mx input.w{border:none;}
     footer{background:#fff;color:var(--steel);border-top:1px solid var(--hairline);}
     footer .label{color:var(--steel);}
     .pathcards{grid-template-columns:repeat(2,1fr);}
@@ -197,7 +280,7 @@
 
   <header>
     <span class="wordmark"><span class="vg">VG</span> ENGINEERING</span>
-    <span class="tool">Design record · Morphological boxes</span>
+    <span class="tool">Design record · Concept tools</span>
   </header>
 
   <div class="storebar" id="storebar">
@@ -205,36 +288,44 @@
     Open the file in your own browser (or host it on GitHub Pages) to keep your work — and use <b>Export</b> for a permanent copy.
   </div>
 
-  <!-- ===================== LIBRARY VIEW ===================== -->
+  <!-- ===================== LIBRARY ===================== -->
   <section id="library">
     <div class="page-head">
-      <p class="label" style="margin-bottom:18px;">Working record · Concept generation</p>
+      <p class="label" style="margin-bottom:18px;">Working record · Concept generation &amp; selection</p>
       <h1>Every design you've explored, in one place.</h1>
-      <p class="lede">Each entry is a morphological box for one problem: the sub-functions, every candidate solution principle, and the <strong>3–4 paths</strong> you traced through them. Build them here as a thinking tool — then export or share any box so a client can keep working on it themselves.</p>
+      <p class="lede"><strong>Morphological boxes</strong> open up the design space and let you trace 3–4 distinct concepts. <strong>Decision matrices</strong> compare those concepts honestly and test whether the choice holds up. Build them here as thinking tools — then export or share any one so a client can keep working on it.</p>
     </div>
 
     <div class="libactions">
-      <button class="btn solid" id="newbox" type="button">+ New box</button>
-      <button class="btn ghost" id="importbox" type="button">Import a box (.json)</button>
+      <button class="btn solid" id="newbox" type="button">+ New morphological box</button>
+      <button class="btn teal solid" id="newmatrix" type="button">+ New decision matrix</button>
       <span class="grow"></span>
+      <button class="btn ghost" id="importbox" type="button">Import (.json)</button>
       <button class="btn ghost" id="backupall" type="button">Back up all</button>
       <button class="btn ghost" id="restoreall" type="button">Restore backup</button>
     </div>
 
+    <div class="filtertabs" id="filtertabs">
+      <button class="ftab active" data-f="all" type="button">All</button>
+      <button class="ftab" data-f="box" type="button">Boxes</button>
+      <button class="ftab" data-f="matrix" type="button">Matrices</button>
+    </div>
+
     <div class="liblist" id="liblist"></div>
-    <div class="libempty" id="libempty" style="display:none;">No boxes yet. Start one with <b>+ New box</b> — it'll appear here and save automatically as you work.</div>
+    <div class="libempty" id="libempty" style="display:none;">Nothing here yet. Start with <b>+ New morphological box</b> or <b>+ New decision matrix</b> — entries appear here and save automatically.</div>
 
     <div class="helpnote">
       <span class="label">On saving — read this once</span>
-      <p>Boxes autosave to <em>this browser on this device</em>. That's convenient, not durable: clearing site data or switching machines loses them. Treat <b>Export</b> / <b>Back up all</b> as the real archive — a JSON file you keep (in your repo, in Drive, wherever). It's also how you hand a box to a client.</p>
-      <p><b>To run this from GitHub:</b> put this file in a repo as <code>index.html</code>, then Settings → Pages → deploy from <code>main</code> / root. It'll be live at <code>your-name.github.io/repo-name/</code>. No build step, nothing to install.</p>
+      <p>Everything autosaves to <em>this browser on this device</em>. That's convenient, not durable: clearing site data or switching machines loses it. Treat <b>Export</b> / <b>Back up all</b> as the real archive — a JSON file you keep (in your repo, in Drive). It's also how you hand work to a client.</p>
+      <p><b>Running from GitHub:</b> this file is <code>index.html</code> at the repo root → Settings → Pages → deploy from <code>main</code> / root. Live at <code>your-name.github.io/repo-name/</code>, no build step.</p>
     </div>
   </section>
 
-  <!-- ===================== EDITOR VIEW ===================== -->
+  <!-- ===================== EDITOR ===================== -->
   <section id="editor" style="display:none;">
     <div class="crumb">
-      <button class="back" id="backbtn" type="button">&larr; All boxes</button>
+      <button class="back" id="backbtn" type="button">&larr; All work</button>
+      <span class="kindtag" id="kindtag">Box</span>
       <span class="grow"></span>
       <span class="savedtag" id="savedtag"></span>
       <button class="btn ghost" id="sharebtn" type="button">Copy share link</button>
@@ -243,7 +334,7 @@
     </div>
 
     <div class="sharedbanner" id="sharedbanner">
-      <p>You're viewing a <b>shared box</b>. It isn't in your record yet — edits here won't be kept unless you save a copy.</p>
+      <p>You're viewing <b>shared work</b>. It isn't in your record yet — edits here won't be kept unless you save a copy.</p>
       <button class="btn" id="savecopy" type="button">Save a copy to my record</button>
     </div>
 
@@ -254,34 +345,65 @@
       <div class="tb-cell"><span class="label">Date · Ref</span><span class="ed" contenteditable="true" data-meta="ref" data-ph="YYYY-MM-DD · REF"></span></div>
     </div>
 
-    <div class="note">
-      <span class="label">How to read it — and what it won't do</span>
-      <p>The box widens the space; it doesn't choose for you. A handful of options on each sub-function already describe thousands of combinations — most of them nonsense, and not every option is compatible with every other. The value is forcing the alternatives into the open so a path is <em>chosen against the full field</em>, not defended because it was first.</p>
-      <p>Trace a path by picking the active path (below), then clicking the dot on one option per row. Write the reasoning for each path in its summary card — that's what feeds the study's tradeoffs. Click any text to edit it.</p>
+    <!-- BOX BODY -->
+    <div id="body-box">
+      <div class="note">
+        <span class="label">How to read it — and what it won't do</span>
+        <p>The box widens the space; it doesn't choose for you. A handful of options on each sub-function already describe thousands of combinations — most of them nonsense, and not every option is compatible with every other. The value is forcing the alternatives into the open so a path is <em>chosen against the full field</em>, not defended because it was first.</p>
+        <p>Trace a path by picking the active path, then clicking the dot on one option per row. Write the reasoning in each path's summary card. Click any text to edit.</p>
+      </div>
+      <div class="toolbar">
+        <span class="tlabel">Active path</span>
+        <div class="pathtabs" id="pathtabs"></div>
+        <button class="btn ghost" id="addpath" type="button">+ path</button>
+      </div>
+      <div class="designspace" id="designspace"></div>
+      <div class="box" id="box"></div>
+      <div class="addrow-wrap"><button class="addrow" id="addrow" type="button">+ add sub-function</button></div>
+      <div class="summary">
+        <span class="label">Path summaries</span>
+        <h2>The paths you've traced — concept seeds for the study</h2>
+        <p class="sub">Each filled path reads top to bottom as one complete concept, plus your reasoning. Carry the strong, genuinely distinct ones into the study as Concept 1, 2, 3…</p>
+        <div class="pathcards" id="pathcards"></div>
+      </div>
     </div>
 
-    <div class="toolbar">
-      <span class="tlabel">Active path</span>
-      <div class="pathtabs" id="pathtabs"></div>
-      <button class="btn ghost" id="addpath" type="button">+ path</button>
+    <!-- MATRIX BODY -->
+    <div id="body-matrix" style="display:none;">
+      <div class="note teal">
+        <span class="label">What this is — and what it isn't</span>
+        <p>A Pugh matrix compares each concept against one baseline — the <b>datum</b> — criterion by criterion: better (+), same (0), or worse (−). It's deliberately coarse, because at concept stage a ± judgement you can defend beats a decimal score you can't. Weights set what matters; the weighted total ranks the options.</p>
+        <p>The real output is below the table: a <b>sensitivity check</b> that tells you whether the ranking survives when the weights move. A recommendation that holds up under reweighting is one you can defend upstairs. One that flips on a small change is a finding in itself — say so.</p>
+      </div>
+      <div class="toolbar">
+        <span class="tlabel">Scale</span>
+        <div class="scaletoggle" id="scaletoggle">
+          <button data-s="pugh" type="button">Pugh · +/0/−</button>
+          <button data-s="ext" type="button">Extended · −2…+2</button>
+        </div>
+      </div>
+      <div class="mxscroll"><table class="mx" id="mxtable"></table></div>
+      <p class="mxhint">Click a score cell to cycle it (right-click to step back). Pick the datum with the radio in each concept's header. Weights can be any positive number.</p>
+      <div class="mxbtns">
+        <button class="btn teal" id="addconcept" type="button">+ concept</button>
+        <button class="btn teal ghost" id="addcriterion" type="button">+ criterion</button>
+      </div>
+      <div class="recblock">
+        <span class="label">Recommendation</span>
+        <textarea id="mxrec" placeholder="Which concept you'd back, why, and the first concrete step to de-risk it — written so it survives the sensitivity check below."></textarea>
+      </div>
+      <div class="sens">
+        <span class="label">Sensitivity — does the choice hold?</span>
+        <h2>Robustness of the ranking</h2>
+        <div id="sensmount"></div>
+      </div>
     </div>
 
-    <div class="designspace" id="designspace"></div>
-
-    <div class="box" id="box"></div>
-    <div class="addrow-wrap"><button class="addrow" id="addrow" type="button">+ add sub-function</button></div>
-
-    <div class="summary">
-      <span class="label">Path summaries</span>
-      <h2>The paths you've traced — concept seeds for the study</h2>
-      <p class="sub">Each filled path reads top to bottom as one complete concept: a chosen principle for every sub-function, plus your reasoning. Carry the strong, genuinely distinct ones into the concept study as Concept 1, 2, 3…</p>
-      <div class="pathcards" id="pathcards"></div>
-    </div>
   </section>
 
   <span class="grow"></span>
   <footer>
-    <span class="label">VG Engineering · Morphological box record</span>
+    <span class="label">VG Engineering · Concept tools</span>
     <span><a href="https://vgengineering.ch">vgengineering.ch</a></span>
   </footer>
 
@@ -294,59 +416,75 @@
   "use strict";
 
   /* ---------- constants ---------- */
-  var KEY="vg_morph_store_v1";
+  var KEY="vg_tools_store_v2", OLDKEY="vg_morph_store_v1";
   var COLORS=["#0E2A4A","#1F6E7A","#B5712A","#5B5470"];
   var LABELS=["A","B","C","D"];
   var DEFAULT_BY="Alejandro Vargas Gonzalez";
+  var DEFAULT_CRITERIA=["Cost","Complexity","Manufacturability","Risk"];
   var uid=0; function nid(p){ uid++; return (p||"id")+Date.now().toString(36)+uid; }
 
   /* ---------- safe storage ---------- */
   var STORAGE_OK=(function(){ try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }catch(e){ return false; } })();
   var mem=null;
-  function readStore(){
-    if(STORAGE_OK){ try{ var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; }catch(e){} }
-    return mem;
-  }
+  function rawRead(k){ if(STORAGE_OK){ try{ var s=localStorage.getItem(k); return s?JSON.parse(s):null; }catch(e){} } return null; }
   function writeStore(o){ mem=o; if(STORAGE_OK){ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} } }
   if(!STORAGE_OK){ document.getElementById("storebar").classList.add("show"); }
 
-  /* ---------- store model ---------- */
-  function freshStore(){ return {version:1, boxes:{}, order:[]}; }
-  var store=readStore()||freshStore();
+  /* ---------- store + migration ---------- */
+  function freshStore(){ return {version:2, items:{}, order:[]}; }
+  function migrateV1(old){
+    var st=freshStore();
+    if(old && old.boxes && old.order){
+      old.order.forEach(function(id){
+        var b=old.boxes[id]; if(!b) return;
+        b.kind="box"; st.items[id]=b; st.order.push(id);
+      });
+    }
+    return st;
+  }
+  var store=rawRead(KEY) || mem;
+  if(!store){
+    var old=rawRead(OLDKEY);
+    store = old ? migrateV1(old) : freshStore();
+    writeStore(store); // persist migration (old key left intact as backup)
+  }
 
+  /* ---------- item factories ---------- */
+  function baseMeta(){ return {project:"",for:"",by:DEFAULT_BY,ref:""}; }
   function newBox(){
     var params=[];
     for(var i=0;i<12;i++){ params.push({id:nid("p"),name:"",options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}]}); }
     var paths=[];
     for(var k=0;k<3;k++){ paths.push({id:nid("path"),label:LABELS[k],name:"Path "+LABELS[k],color:COLORS[k],rationale:"",sel:{}}); }
     var now=Date.now();
-    return {id:nid("box"),createdAt:now,updatedAt:now,meta:{project:"",for:"",by:DEFAULT_BY,ref:""},params:params,paths:paths};
+    return {id:nid("box"),kind:"box",createdAt:now,updatedAt:now,meta:baseMeta(),params:params,paths:paths};
   }
-  function addBoxToStore(box){ store.boxes[box.id]=box; store.order.unshift(box.id); persist(); }
-  function deleteBox(id){ delete store.boxes[id]; var i=store.order.indexOf(id); if(i>-1) store.order.splice(i,1); persist(); }
+  function newMatrix(){
+    var concepts=[{id:nid("c"),name:"Concept 1"},{id:nid("c"),name:"Concept 2"},{id:nid("c"),name:"Concept 3"}];
+    var criteria=DEFAULT_CRITERIA.map(function(n){ return {id:nid("k"),name:n,weight:3}; });
+    var scores={};
+    concepts.forEach(function(c){ scores[c.id]={}; criteria.forEach(function(k){ scores[c.id][k.id]=0; }); });
+    var now=Date.now();
+    return {id:nid("mx"),kind:"matrix",createdAt:now,updatedAt:now,meta:baseMeta(),scale:"pugh",datum:concepts[0].id,concepts:concepts,criteria:criteria,scores:scores,recommendation:""};
+  }
+  function addItem(it){ store.items[it.id]=it; store.order.unshift(it.id); persist(); }
+  function deleteItem(id){ delete store.items[id]; var i=store.order.indexOf(id); if(i>-1) store.order.splice(i,1); persist(); }
 
+  /* ---------- persist ---------- */
+  var current=null, isShared=false, activePath=null, libFilter="all";
   var saveTimer=null;
   function persist(){
-    if(isShared) return; // shared (unsaved) boxes never touch the store
+    if(isShared) return;
     if(current){ current.updatedAt=Date.now(); }
     if(saveTimer) clearTimeout(saveTimer);
     saveTimer=setTimeout(function(){ writeStore(store); flashSaved(); },350);
   }
   function flashSaved(){
-    var t=document.getElementById("savedtag");
-    if(!t||isShared) return;
-    t.textContent= STORAGE_OK? "Saved ✓" : "Not saved (preview)";
-    if(STORAGE_OK){ t.style.color="#2E7D52"; setTimeout(function(){ t.style.color="var(--steel)"; t.textContent="Saved"; },900); }
+    var t=document.getElementById("savedtag"); if(!t||isShared) return;
+    if(STORAGE_OK){ t.style.color="#2E7D52"; t.textContent="Saved ✓"; setTimeout(function(){ t.style.color="var(--steel)"; t.textContent="Saved"; },900); }
+    else t.textContent="Not saved (preview)";
   }
-
-  /* ---------- current editing state ---------- */
-  var current=null;       // box object being edited
-  var isShared=false;     // true when loaded from a share link (not in store)
-  var activePath=null;
-
-  function pathById(id){ for(var i=0;i<current.paths.length;i++){ if(current.paths[i].id===id) return current.paths[i]; } return null; }
-  function paramById(id){ for(var i=0;i<current.params.length;i++){ if(current.params[i].id===id) return current.params[i]; } return null; }
-  function active(){ return pathById(activePath); }
+  function fmtDate(ms){ try{ return new Date(ms).toISOString().slice(0,10); }catch(e){ return ""; } }
 
   /* ---------- views ---------- */
   function showLibrary(){
@@ -355,71 +493,88 @@
     document.getElementById("library").style.display="";
     renderLibrary();
   }
-  function showEditor(box,shared){
-    current=box; isShared=!!shared;
-    activePath=box.paths.length?box.paths[0].id:null;
+  function showEditor(it,shared){
+    current=it; isShared=!!shared;
     document.getElementById("library").style.display="none";
     document.getElementById("editor").style.display="";
     document.getElementById("sharedbanner").classList.toggle("show",isShared);
     document.getElementById("savedtag").textContent= isShared? "" : (STORAGE_OK?"Saved":"Not saved (preview)");
-    // fill meta
-    Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){
-      el.textContent = box.meta[el.dataset.meta]||"";
-    });
-    renderTabs(); renderBox(); renderCards(); updateCounter();
+    var kt=document.getElementById("kindtag");
+    kt.textContent= it.kind==="matrix"?"Decision matrix":"Morphological box";
+    kt.classList.toggle("matrix", it.kind==="matrix");
+    Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){ el.textContent=it.meta[el.dataset.meta]||""; });
+    document.getElementById("body-box").style.display = it.kind==="box"?"":"none";
+    document.getElementById("body-matrix").style.display = it.kind==="matrix"?"":"none";
+    if(it.kind==="box"){ activePath=it.paths.length?it.paths[0].id:null; renderTabs(); renderBox(); renderCards(); updateCounter(); }
+    else { mxInit(); }
     window.scrollTo(0,0);
   }
 
-  /* ---------- library render ---------- */
+  /* ---------- library ---------- */
   function renderLibrary(){
-    var list=document.getElementById("liblist");
-    var empty=document.getElementById("libempty");
+    var list=document.getElementById("liblist"), empty=document.getElementById("libempty");
     list.innerHTML="";
-    if(!store.order.length){ empty.style.display=""; return; }
+    var ids=store.order.filter(function(id){ var it=store.items[id]; return it && (libFilter==="all"||it.kind===libFilter); });
+    if(!ids.length){ empty.style.display=""; return; }
     empty.style.display="none";
-    store.order.forEach(function(id){
-      var b=store.boxes[id]; if(!b) return;
-      var card=document.createElement("div"); card.className="bxcard";
+    ids.forEach(function(id){
+      var it=store.items[id]; var isMx=it.kind==="matrix";
+      var card=document.createElement("div"); card.className="bxcard"+(isMx?" matrix":"");
       var body=document.createElement("div"); body.className="bxbody";
-      var nm=document.createElement("div"); nm.className="bxname"; nm.textContent=b.meta.project||"Untitled box";
-      var cl=document.createElement("div"); cl.className="bxclient"; cl.textContent=b.meta.for||"—";
-      var filled=0; b.paths.forEach(function(p){ if(Object.keys(p.sel).length) filled++; });
-      var meta=document.createElement("div"); meta.className="bxmeta";
-      meta.textContent=b.params.length+" sub-functions · "+b.paths.length+" paths · "+filled+" traced · "+fmtDate(b.updatedAt);
-      body.appendChild(nm); body.appendChild(cl); body.appendChild(meta);
-
+      var kind=document.createElement("span"); kind.className="kind"; kind.textContent=isMx?"Matrix":"Box";
+      var nm=document.createElement("div"); nm.className="bxname"; nm.textContent=it.meta.project||(isMx?"Untitled matrix":"Untitled box");
+      var cl=document.createElement("div"); cl.className="bxclient"; cl.textContent=it.meta.for||"—";
+      var meta=document.createElement("div"); meta.className="bxmeta"; meta.textContent=summaryLine(it)+" · "+fmtDate(it.updatedAt);
+      body.appendChild(kind); body.appendChild(nm); body.appendChild(cl); body.appendChild(meta);
       var acts=document.createElement("div"); acts.className="bxacts";
-      acts.appendChild(actBtn("Open",function(){ openBox(id); }));
-      acts.appendChild(actBtn("Duplicate",function(){ duplicateBox(id); }));
-      acts.appendChild(actBtn("Export",function(){ exportBox(b); }));
-      acts.appendChild(actBtn("Link",function(){ copyShare(b); }));
-      var del=actBtn("Delete",function(){ if(confirm("Delete \""+(b.meta.project||"Untitled box")+"\"? This can't be undone.")){ deleteBox(id); renderLibrary(); } });
-      del.className="danger";
+      acts.appendChild(actBtn("Open",function(){ openItem(id); }));
+      acts.appendChild(actBtn("Duplicate",function(){ duplicateItem(id); }));
+      acts.appendChild(actBtn("Export",function(){ exportItem(it); }));
+      acts.appendChild(actBtn("Link",function(){ copyShare(it); }));
+      var del=actBtn("Delete",function(){ if(confirm("Delete \""+(it.meta.project||"this")+"\"? This can't be undone.")){ deleteItem(id); renderLibrary(); } }); del.className="danger";
       acts.appendChild(del);
-
       card.appendChild(body); card.appendChild(acts);
       list.appendChild(card);
     });
   }
+  function summaryLine(it){
+    if(it.kind==="matrix"){
+      var lead=mxLeaderName(it);
+      return it.concepts.length+" concepts · "+it.criteria.length+" criteria · leads: "+(lead||"—");
+    }
+    var traced=0; it.paths.forEach(function(p){ if(Object.keys(p.sel).length) traced++; });
+    return it.params.length+" sub-functions · "+it.paths.length+" paths · "+traced+" traced";
+  }
   function actBtn(label,fn){ var b=document.createElement("button"); b.type="button"; b.textContent=label; b.addEventListener("click",fn); return b; }
-  function fmtDate(ms){ try{ var d=new Date(ms); return d.toISOString().slice(0,10); }catch(e){ return ""; } }
 
-  /* ---------- navigation ---------- */
-  function openBox(id){ var b=store.boxes[id]; if(!b){ showLibrary(); return; } history.replaceState(null,"","#box/"+id); showEditor(b,false); }
-  function duplicateBox(id){
-    var src=store.boxes[id]; if(!src) return;
-    var copy=JSON.parse(JSON.stringify(src));
-    copy.id=nid("box"); copy.createdAt=Date.now(); copy.updatedAt=Date.now();
-    copy.meta.project=(copy.meta.project||"Untitled box")+" (copy)";
-    addBoxToStore(copy); renderLibrary();
+  document.getElementById("filtertabs").addEventListener("click",function(e){
+    var b=e.target.closest(".ftab"); if(!b) return;
+    libFilter=b.dataset.f;
+    Array.prototype.forEach.call(this.querySelectorAll(".ftab"),function(t){ t.classList.toggle("active",t===b); });
+    renderLibrary();
+  });
+
+  /* ---------- nav ---------- */
+  function openItem(id){ var it=store.items[id]; if(!it){ showLibrary(); return; } history.replaceState(null,"","#item/"+id); showEditor(it,false); }
+  function duplicateItem(id){
+    var src=store.items[id]; if(!src) return;
+    var copy=JSON.parse(JSON.stringify(src)); copy.id=nid(src.kind); copy.createdAt=Date.now(); copy.updatedAt=Date.now();
+    copy.meta.project=(copy.meta.project||"Untitled")+" (copy)";
+    addItem(copy); renderLibrary();
   }
 
-  /* ---------- path tabs ---------- */
+  /* ========================================================= */
+  /*  MORPHOLOGICAL BOX                                        */
+  /* ========================================================= */
+  function pathById(id){ for(var i=0;i<current.paths.length;i++){ if(current.paths[i].id===id) return current.paths[i]; } return null; }
+  function paramById(id){ for(var i=0;i<current.params.length;i++){ if(current.params[i].id===id) return current.params[i]; } return null; }
+  function active(){ return pathById(activePath); }
+
   function renderTabs(){
     var wrap=document.getElementById("pathtabs"); wrap.innerHTML="";
     current.paths.forEach(function(p){
       var tab=document.createElement("div"); tab.className="ptab"+(p.id===activePath?" active":"");
-      if(p.id===activePath){ tab.style.borderColor=p.color; }
+      if(p.id===activePath) tab.style.borderColor=p.color;
       var sw=document.createElement("span"); sw.className="sw"; sw.style.background=p.color;
       var nm=document.createElement("span"); nm.className="pname"; nm.contentEditable=true; nm.textContent=p.name; nm.style.color=p.color;
       nm.addEventListener("input",function(){ p.name=nm.textContent; renderCards(); persist(); });
@@ -438,10 +593,9 @@
       tab.addEventListener("click",function(){ activePath=p.id; renderTabs(); refreshAllSelections(); });
       wrap.appendChild(tab);
     });
-    document.getElementById("addpath").style.display = current.paths.length>=4? "none":"";
+    document.getElementById("addpath").style.display = current.paths.length>=4?"none":"";
   }
 
-  /* ---------- box render ---------- */
   function renderBox(){
     var box=document.getElementById("box"); box.innerHTML="";
     current.params.forEach(function(p,idx){
@@ -467,12 +621,11 @@
       box.appendChild(row);
     });
   }
-
   function buildOpt(p,o){
     var el=document.createElement("div"); el.className="opt"; el.dataset.oid=o.id; el.dataset.pid=p.id;
-    var dot=document.createElement("button"); dot.className="dot"; dot.type="button"; dot.title="Assign active path to this option";
+    var dot=document.createElement("button"); dot.className="dot"; dot.type="button"; dot.title="Assign active path";
     dot.addEventListener("click",function(){ var ap=active(); if(!ap) return;
-      if(ap.sel[p.id]===o.id){ delete ap.sel[p.id]; } else { ap.sel[p.id]=o.id; }
+      if(ap.sel[p.id]===o.id) delete ap.sel[p.id]; else ap.sel[p.id]=o.id;
       refreshRow(p.id); renderCards(); persist();
     });
     var tx=document.createElement("span"); tx.className="otext"; tx.contentEditable=true; tx.setAttribute("data-ph","solution principle"); tx.textContent=o.text;
@@ -484,47 +637,28 @@
       el.parentNode.removeChild(el); renderCards(); updateCounter(); persist();
     });
     el.appendChild(dot); el.appendChild(tx); el.appendChild(tags); el.appendChild(rm);
-    applyOptState(el,p,o);
-    return el;
+    applyOptState(el,p,o); return el;
   }
-
   function applyOptState(el,p,o){
     var tags=el.querySelector(".tags"); tags.innerHTML=""; var activeSelected=false;
     current.paths.forEach(function(pa){
-      if(pa.sel[p.id]===o.id){
-        var t=document.createElement("span"); t.className="t"; t.style.background=pa.color; t.textContent=pa.label; tags.appendChild(t);
-        if(pa.id===activePath) activeSelected=true;
-      }
+      if(pa.sel[p.id]===o.id){ var t=document.createElement("span"); t.className="t"; t.style.background=pa.color; t.textContent=pa.label; tags.appendChild(t); if(pa.id===activePath) activeSelected=true; }
     });
-    if(activeSelected){ el.classList.add("sel"); el.style.setProperty("--selclr",active().color); }
-    else { el.classList.remove("sel"); el.style.removeProperty("--selclr"); }
+    if(activeSelected){ el.classList.add("sel"); el.style.setProperty("--selclr",active().color); } else { el.classList.remove("sel"); el.style.removeProperty("--selclr"); }
     var dot=el.querySelector(".dot");
-    if(activeSelected){ dot.style.background=active().color; dot.style.borderColor=active().color; }
-    else { dot.style.background="var(--paper)"; dot.style.borderColor="var(--steel)"; }
+    if(activeSelected){ dot.style.background=active().color; dot.style.borderColor=active().color; } else { dot.style.background="var(--paper)"; dot.style.borderColor="var(--steel)"; }
   }
-  function refreshRow(pid){
-    var p=paramById(pid); if(!p) return;
-    var row=document.querySelector('.row[data-pid="'+pid+'"]'); if(!row) return;
-    Array.prototype.forEach.call(row.querySelectorAll(".opt"),function(el){
-      var o=null; for(var i=0;i<p.options.length;i++){ if(p.options[i].id===el.dataset.oid){o=p.options[i];break;} }
-      if(o) applyOptState(el,p,o);
-    });
+  function refreshRow(pid){ var p=paramById(pid); if(!p) return; var row=document.querySelector('.row[data-pid="'+pid+'"]'); if(!row) return;
+    Array.prototype.forEach.call(row.querySelectorAll(".opt"),function(el){ var o=null; for(var i=0;i<p.options.length;i++){ if(p.options[i].id===el.dataset.oid){o=p.options[i];break;} } if(o) applyOptState(el,p,o); });
   }
   function refreshAllSelections(){ current.params.forEach(function(p){ refreshRow(p.id); }); }
-
-  /* ---------- design-space counter ---------- */
   function updateCounter(){
     var product=1, filled=0;
-    current.params.forEach(function(p){
-      var n=0; p.options.forEach(function(o){ if((o.text||"").trim()) n++; });
-      if(n>0){ product*=n; filled++; }
-    });
+    current.params.forEach(function(p){ var n=0; p.options.forEach(function(o){ if((o.text||"").trim()) n++; }); if(n>0){ product*=n; filled++; } });
     var el=document.getElementById("designspace");
     if(filled===0){ el.innerHTML="Design space · fill in options to see how large the space is · then trace 3–4 paths worth studying."; return; }
     el.innerHTML="Design space · <b>≈ "+product.toLocaleString()+"</b> possible combinations across "+filled+" filled sub-function"+(filled>1?"s":"")+" · trace 3–4 worth studying.";
   }
-
-  /* ---------- path summary cards ---------- */
   function renderCards(){
     var wrap=document.getElementById("pathcards"); wrap.innerHTML="";
     current.paths.forEach(function(pa){
@@ -538,10 +672,9 @@
       current.params.forEach(function(p,idx){
         var tr=document.createElement("tr");
         var k=document.createElement("td"); k.className="k"; k.textContent=(idx+1<10?"0":"")+(idx+1)+" "+(p.name||"—");
-        var v=document.createElement("td"); v.className="v";
-        var oid=pa.sel[p.id]; var txt="";
+        var v=document.createElement("td"); v.className="v"; var oid=pa.sel[p.id]; var txt="";
         if(oid){ for(var j=0;j<p.options.length;j++){ if(p.options[j].id===oid){ txt=p.options[j].text; break; } } }
-        if(txt){ v.textContent=txt; } else { v.textContent="—"; v.classList.add("unset"); }
+        if(txt) v.textContent=txt; else { v.textContent="—"; v.classList.add("unset"); }
         tr.appendChild(k); tr.appendChild(v); tb.appendChild(tr);
       });
       tbl.appendChild(tb);
@@ -555,43 +688,258 @@
     });
   }
 
-  /* ---------- plain-text paste for all contenteditable ---------- */
+  /* ========================================================= */
+  /*  DECISION MATRIX (Pugh + sensitivity)                     */
+  /* ========================================================= */
+  function mxScaleVals(){ return current.scale==="ext"?[-2,-1,0,1,2]:[-1,0,1]; }
+  function mxScoreOf(cid,kid){ return (current.scores[cid]&&typeof current.scores[cid][kid]==="number")?current.scores[cid][kid]:0; }
+  function mxEnsureScores(){
+    current.concepts.forEach(function(c){ if(!current.scores[c.id]) current.scores[c.id]={}; current.criteria.forEach(function(k){ if(typeof current.scores[c.id][k.id]!=="number") current.scores[c.id][k.id]=0; }); });
+  }
+  function mxTotals(weightFn){
+    // weightFn(criterion) -> weight ; datum total = 0
+    var totals={};
+    current.concepts.forEach(function(c){
+      if(c.id===current.datum){ totals[c.id]=0; return; }
+      var s=0; current.criteria.forEach(function(k){ s += weightFn(k)*mxScoreOf(c.id,k.id); });
+      totals[c.id]=s;
+    });
+    return totals;
+  }
+  function mxLeaderId(totals){
+    var best=null, bv=-Infinity;
+    current.concepts.forEach(function(c){ var v=totals[c.id]; if(v>bv){ bv=v; best=c.id; } });
+    return best;
+  }
+  function mxConceptName(id){ for(var i=0;i<current.concepts.length;i++){ if(current.concepts[i].id===id) return current.concepts[i].name||("Concept "+(i+1)); } return "—"; }
+  function mxLeaderName(it){
+    if(!it.concepts||!it.concepts.length||!it.criteria||!it.criteria.length) return null;
+    var save=current; current=it;
+    var t=mxTotals(function(k){ return Number(k.weight)||0; });
+    var id=mxLeaderId(t); var nm=mxConceptName(id);
+    current=save; return nm;
+  }
+
+  function mxInit(){
+    mxEnsureScores();
+    Array.prototype.forEach.call(document.querySelectorAll("#scaletoggle button"),function(b){ b.classList.toggle("active",b.dataset.s===current.scale); });
+    document.getElementById("mxrec").value=current.recommendation||"";
+    mxRenderTable(); mxUpdateDynamic();
+  }
+
+  function mxRenderTable(){
+    var t=document.getElementById("mxtable"); t.innerHTML="";
+    var thead=document.createElement("thead");
+    var hr=document.createElement("tr");
+    var corner=document.createElement("th"); corner.className="corner"; corner.textContent="Criteria \\ Concepts"; hr.appendChild(corner);
+    var wth=document.createElement("th"); wth.className="wcol"; wth.textContent="Weight"; hr.appendChild(wth);
+    current.concepts.forEach(function(c){
+      var th=document.createElement("th"); th.className="cncell";
+      var nm=document.createElement("div"); nm.className="cnname"; nm.contentEditable=true; nm.textContent=c.name;
+      nm.addEventListener("input",function(){ c.name=nm.textContent; persist(); mxUpdateDynamic(); });
+      var ctl=document.createElement("div"); ctl.className="cnctl";
+      var lab=document.createElement("label"); var rb=document.createElement("input"); rb.type="radio"; rb.name="datum"; rb.checked=(c.id===current.datum);
+      rb.addEventListener("change",function(){ current.datum=c.id; persist(); mxRenderTable(); mxUpdateDynamic(); });
+      lab.appendChild(rb); lab.appendChild(document.createTextNode("datum"));
+      ctl.appendChild(lab);
+      if(current.concepts.length>1){
+        var rm=document.createElement("button"); rm.className="cnrm"; rm.type="button"; rm.innerHTML="&times;"; rm.title="Remove concept";
+        rm.addEventListener("click",function(){ var i=current.concepts.indexOf(c); if(i>-1) current.concepts.splice(i,1); delete current.scores[c.id];
+          if(current.datum===c.id) current.datum=current.concepts[0].id;
+          persist(); mxRenderTable(); mxUpdateDynamic(); });
+        ctl.appendChild(rm);
+      }
+      th.appendChild(nm); th.appendChild(ctl); hr.appendChild(th);
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+
+    var tbody=document.createElement("tbody");
+    current.criteria.forEach(function(k){
+      var tr=document.createElement("tr");
+      var kc=document.createElement("td"); kc.className="critcell";
+      if(current.criteria.length>1){
+        var krm=document.createElement("button"); krm.className="critrm"; krm.type="button"; krm.innerHTML="&times;"; krm.title="Remove criterion";
+        krm.addEventListener("click",function(){ var i=current.criteria.indexOf(k); if(i>-1) current.criteria.splice(i,1);
+          current.concepts.forEach(function(c){ if(current.scores[c.id]) delete current.scores[c.id][k.id]; });
+          persist(); mxRenderTable(); mxUpdateDynamic(); });
+        kc.appendChild(krm);
+      }
+      var kn=document.createElement("span"); kn.className="critname"; kn.contentEditable=true; kn.textContent=k.name;
+      kn.addEventListener("input",function(){ k.name=kn.textContent; persist(); });
+      kc.appendChild(kn); tr.appendChild(kc);
+      var wc=document.createElement("td");
+      var wi=document.createElement("input"); wi.className="w"; wi.type="number"; wi.min="0"; wi.step="1"; wi.value=k.weight;
+      wi.addEventListener("input",function(){ var v=parseFloat(wi.value); k.weight=isNaN(v)?0:v; persist(); mxUpdateDynamic(); });
+      wc.appendChild(wi); tr.appendChild(wc);
+      current.concepts.forEach(function(c){
+        var td=document.createElement("td");
+        if(c.id===current.datum){ td.className="datum"; td.textContent="DATUM"; }
+        else {
+          td.className="score"; setScoreCell(td,mxScoreOf(c.id,k.id));
+          td.addEventListener("click",function(){ mxCycle(c.id,k.id,td,1); });
+          td.addEventListener("contextmenu",function(e){ e.preventDefault(); mxCycle(c.id,k.id,td,-1); });
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    t.appendChild(tbody);
+
+    var tfoot=document.createElement("tfoot"); tfoot.id="mxfoot"; t.appendChild(tfoot);
+  }
+
+  function setScoreCell(td,v){
+    var sign=v>0?"+":""; td.textContent= v===0?"0":sign+v;
+    td.classList.remove("pos","neg","zero");
+    td.classList.add(v>0?"pos":v<0?"neg":"zero");
+  }
+  function mxCycle(cid,kid,td,dir){
+    var vals=mxScaleVals(); var cur=mxScoreOf(cid,kid); var i=vals.indexOf(cur); if(i<0) i=vals.indexOf(0);
+    i=(i+dir+vals.length)%vals.length; var nv=vals[i];
+    current.scores[cid][kid]=nv; setScoreCell(td,nv); persist(); mxUpdateDynamic();
+  }
+
+  function mxUpdateDynamic(){
+    var foot=document.getElementById("mxfoot"); if(!foot) return; foot.innerHTML="";
+    var hasData = current.concepts.length>=1 && current.criteria.length>=1;
+    var totals=mxTotals(function(k){ return Number(k.weight)||0; });
+    // ranks
+    var arr=current.concepts.map(function(c){ return {id:c.id,total:totals[c.id]}; }).sort(function(a,b){ return b.total-a.total; });
+    var rankOf={}; var lastVal=null, lastRank=0;
+    arr.forEach(function(o,i){ var r=(lastVal!==null&&o.total===lastVal)?lastRank:i+1; rankOf[o.id]=r; lastVal=o.total; lastRank=r; });
+    var leadId=arr.length?arr[0].id:null;
+
+    var rTot=document.createElement("tr"); rTot.className="frow";
+    var l1=document.createElement("td"); l1.className="flabel"; l1.textContent="Weighted total"; rTot.appendChild(l1);
+    rTot.appendChild(document.createElement("td"));
+    current.concepts.forEach(function(c){ var td=document.createElement("td"); td.className="total"+(c.id===leadId&&hasData?" leader":""); td.textContent=(c.id===current.datum?"0 (datum)":fmtNum(totals[c.id])); rTot.appendChild(td); });
+    foot.appendChild(rTot);
+
+    var rRank=document.createElement("tr");
+    var l2=document.createElement("td"); l2.className="flabel rank"; l2.textContent="Rank"; rRank.appendChild(l2);
+    rRank.appendChild(document.createElement("td"));
+    current.concepts.forEach(function(c){ var td=document.createElement("td"); td.className="rank"; var r=rankOf[c.id]; td.innerHTML=(r===1?'<span class="badge">#1</span>':"#"+r); rRank.appendChild(td); });
+    foot.appendChild(rRank);
+
+    var rCnt=document.createElement("tr");
+    var l3=document.createElement("td"); l3.className="flabel rank"; l3.textContent="+ / 0 / −"; rCnt.appendChild(l3);
+    rCnt.appendChild(document.createElement("td"));
+    current.concepts.forEach(function(c){ var td=document.createElement("td"); td.className="rank";
+      if(c.id===current.datum){ td.textContent="—"; } else { var p=0,z=0,n=0; current.criteria.forEach(function(k){ var v=mxScoreOf(c.id,k.id); if(v>0)p++; else if(v<0)n++; else z++; }); td.textContent=p+" / "+z+" / "+n; }
+      rCnt.appendChild(td); });
+    foot.appendChild(rCnt);
+
+    mxRenderSensitivity(totals,leadId,hasData);
+  }
+  function fmtNum(n){ return (Math.round(n*100)/100).toString(); }
+
+  /* ---- seeded PRNG for reproducible robustness sweep ---- */
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+  function mxRenderSensitivity(totals,leadId,hasData){
+    var mount=document.getElementById("sensmount"); mount.innerHTML="";
+    if(!hasData || current.concepts.length<2 || current.criteria.length<1){
+      var p=document.createElement("div"); p.className="panel"; var l=document.createElement("div"); l.className="line";
+      l.textContent="Add at least two concepts and one criterion to test the ranking.";
+      p.appendChild(l); mount.appendChild(p); return;
+    }
+    var panel=document.createElement("div"); panel.className="panel";
+
+    // 1. under your weights
+    panel.appendChild(sLine("Under your weights", "<b>"+esc(mxConceptName(leadId))+"</b> leads"+(leadId===current.datum?" — the datum beats every alternative; none of your concepts is clearly better than the reference.":" (weighted total "+fmtNum(totals[leadId])+").")));
+
+    // 2. equal weights
+    var eqT=mxTotals(function(){ return 1; }); var eqLead=mxLeaderId(eqT);
+    var eqMsg="<b>"+esc(mxConceptName(eqLead))+"</b> leads"+(eqLead===leadId?" — same as your weighting.":" — <b>different</b> from your weighting, so the result is being driven by the weights you chose.");
+    panel.appendChild(sLine("If every criterion mattered equally", eqMsg));
+
+    // 3. robustness sweep (seeded, reproducible)
+    var TRIALS=600; var rng=mulberry32(0x9E3779B1);
+    var wins={}; current.concepts.forEach(function(c){ wins[c.id]=0; });
+    for(var t=0;t<TRIALS;t++){
+      var w={}; current.criteria.forEach(function(k){ w[k.id]=rng(); });
+      var tt={}; var best=null,bv=-Infinity;
+      current.concepts.forEach(function(c){
+        var s=0; if(c.id!==current.datum){ current.criteria.forEach(function(k){ s += w[k.id]*mxScoreOf(c.id,k.id); }); }
+        tt[c.id]=s; if(s>bv){ bv=s; best=c.id; }
+      });
+      wins[best]++;
+    }
+    var dist=current.concepts.map(function(c){ return {id:c.id,name:mxConceptName(c.id),pct:Math.round(wins[c.id]/TRIALS*100)}; }).sort(function(a,b){ return b.pct-a.pct; });
+    var barsWrap=document.createElement("div"); barsWrap.className="line";
+    var k=document.createElement("span"); k.className="k"; k.textContent="Across 600 random weightings, how often each wins"; barsWrap.appendChild(k);
+    var bars=document.createElement("div"); bars.className="bars";
+    dist.forEach(function(d){
+      var row=document.createElement("div"); row.className="bar";
+      var nm=document.createElement("span"); nm.className="nm"; nm.textContent=d.name+(d.id===current.datum?" (datum)":"");
+      var track=document.createElement("span"); track.className="track"; var fill=document.createElement("span"); fill.className="fill"; fill.style.width=d.pct+"%"; track.appendChild(fill);
+      var pct=document.createElement("span"); pct.className="pct"; pct.textContent=d.pct+"%";
+      row.appendChild(nm); row.appendChild(track); row.appendChild(pct); bars.appendChild(row);
+    });
+    barsWrap.appendChild(bars); panel.appendChild(barsWrap);
+
+    // 4. verdict
+    var top=dist[0]; var verdict=document.createElement("div");
+    if(top.pct>=65){ verdict.className="verdict robust"; verdict.innerHTML="<b>Robust.</b> "+esc(top.name)+" wins under most plausible weightings ("+top.pct+"%). The recommendation holds even if priorities shift — defendable upstairs."; }
+    else if(top.pct>=45){ verdict.className="verdict mod"; verdict.innerHTML="<b>Moderately sensitive.</b> "+esc(top.name)+" leads ("+top.pct+"%) but a real share of weightings favour another. Name the conditions under which the choice changes."; }
+    else { verdict.className="verdict fragile"; verdict.innerHTML="<b>Highly sensitive.</b> No concept dominates — the leader ("+esc(top.name)+", "+top.pct+"%) depends heavily on the weights. That's a finding: the decision turns on priorities, not engineering, so get those agreed first."; }
+    panel.appendChild(verdict);
+
+    mount.appendChild(panel);
+  }
+  function sLine(k,html){ var d=document.createElement("div"); d.className="line"; var s=document.createElement("span"); s.className="k"; s.textContent=k; d.appendChild(s); var p=document.createElement("span"); p.innerHTML=html; d.appendChild(p); return d; }
+  function esc(s){ return (s||"").replace(/[&<>]/g,function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]; }); }
+
+  /* matrix toolbar buttons */
+  document.getElementById("scaletoggle").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b||!current||current.kind!=="matrix") return;
+    current.scale=b.dataset.s;
+    if(current.scale==="pugh"){ // clamp into [-1,1]
+      current.concepts.forEach(function(c){ current.criteria.forEach(function(k){ var v=mxScoreOf(c.id,k.id); current.scores[c.id][k.id]=Math.max(-1,Math.min(1,v)); }); });
+    }
+    Array.prototype.forEach.call(this.querySelectorAll("button"),function(x){ x.classList.toggle("active",x===b); });
+    persist(); mxRenderTable(); mxUpdateDynamic();
+  });
+  document.getElementById("addconcept").addEventListener("click",function(){
+    var c={id:nid("c"),name:"Concept "+(current.concepts.length+1)}; current.concepts.push(c); current.scores[c.id]={};
+    current.criteria.forEach(function(k){ current.scores[c.id][k.id]=0; });
+    persist(); mxRenderTable(); mxUpdateDynamic();
+  });
+  document.getElementById("addcriterion").addEventListener("click",function(){
+    var k={id:nid("k"),name:"",weight:3}; current.criteria.push(k);
+    current.concepts.forEach(function(c){ if(!current.scores[c.id]) current.scores[c.id]={}; current.scores[c.id][k.id]=0; });
+    persist(); mxRenderTable(); mxUpdateDynamic();
+  });
+  document.getElementById("mxrec").addEventListener("input",function(){ if(current&&current.kind==="matrix"){ current.recommendation=this.value; persist(); } });
+
+  /* ========================================================= */
+  /*  SHARED: paste / meta / export / import / share / router  */
+  /* ========================================================= */
   document.addEventListener("paste",function(e){
     var t=e.target;
-    if(t && t.getAttribute && t.getAttribute("contenteditable")==="true"){
-      e.preventDefault();
-      var text=(e.clipboardData||window.clipboardData).getData("text/plain");
+    if(t&&t.getAttribute&&t.getAttribute("contenteditable")==="true"){
+      e.preventDefault(); var text=(e.clipboardData||window.clipboardData).getData("text/plain");
       document.execCommand("insertText",false,text);
     }
   });
-
-  /* ---------- meta editing ---------- */
   Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){
     el.addEventListener("input",function(){ if(current){ current.meta[el.dataset.meta]=el.textContent; persist(); } });
   });
 
-  /* ---------- export / import / share ---------- */
-  function toB64(str){ var bytes=new TextEncoder().encode(str), bin=""; for(var i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin); }
-  function fromB64(b64){ var bin=atob(b64), bytes=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
-  function download(name,obj){
-    var blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
-    var url=URL.createObjectURL(blob); var a=document.createElement("a");
-    a.href=url; a.download=name; document.body.appendChild(a); a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },0);
-  }
-  function safeName(b){ return (b.meta.project||"box").replace(/[^a-z0-9\-_]+/gi,"_").slice(0,40); }
-  function exportBox(b){ download("VG_morphbox_"+safeName(b)+".json",{type:"vg-morphbox",version:1,box:b}); }
-  function copyShare(b){
-    var data=toB64(JSON.stringify(b));
-    var url=location.origin+location.pathname+"#data="+data;
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(url).then(function(){ alert("Share link copied to clipboard.\n\nAnyone who opens it sees this box and can save their own copy."); },function(){ prompt("Copy this share link:",url); });
-    } else { prompt("Copy this share link:",url); }
+  function toB64(str){ var b=new TextEncoder().encode(str),s=""; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+  function fromB64(b64){ var bin=atob(b64),b=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return new TextDecoder().decode(b); }
+  function download(name,obj){ var blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}); var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },0); }
+  function safeName(it){ return (it.meta.project||it.kind).replace(/[^a-z0-9\-_]+/gi,"_").slice(0,40); }
+  function exportItem(it){ download("VG_"+it.kind+"_"+safeName(it)+".json",{type:"vg-tool",version:2,item:it}); }
+  function copyShare(it){
+    var url=location.origin+location.pathname+"#data="+toB64(JSON.stringify(it));
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(function(){ alert("Share link copied.\n\nWhoever opens it sees this work and can save their own copy."); },function(){ prompt("Copy this share link:",url); }); }
+    else prompt("Copy this share link:",url);
   }
 
-  function importBoxFlow(){ pendingImport="box"; document.getElementById("fileinput").click(); }
-  function restoreAllFlow(){ if(!confirm("Restore from a backup file? This REPLACES every box currently in this browser.")) return; pendingImport="all"; document.getElementById("fileinput").click(); }
   var pendingImport=null;
+  function importFlow(){ pendingImport="one"; document.getElementById("fileinput").click(); }
+  function restoreFlow(){ if(!confirm("Restore from a backup file? This REPLACES everything currently in this browser.")) return; pendingImport="all"; document.getElementById("fileinput").click(); }
   document.getElementById("fileinput").addEventListener("change",function(e){
     var f=e.target.files&&e.target.files[0]; if(!f){ pendingImport=null; return; }
     var r=new FileReader();
@@ -599,12 +947,13 @@
       try{
         var data=JSON.parse(r.result);
         if(pendingImport==="all"){
-          if(data&&data.boxes&&data.order){ store=data; writeStore(store); renderLibrary(); alert("Backup restored."); }
+          if(data&&data.items&&data.order){ store=data; writeStore(store); renderLibrary(); alert("Backup restored."); }
+          else if(data&&data.boxes&&data.order){ store=migrateV1(data); writeStore(store); renderLibrary(); alert("Older backup restored and upgraded."); }
           else alert("That doesn't look like a full backup file.");
         } else {
-          var box = data&&data.box? data.box : (data&&data.params? data : null);
-          if(box&&box.params){ box.id=nid("box"); box.createdAt=box.createdAt||Date.now(); box.updatedAt=Date.now(); if(!box.meta) box.meta={project:"",for:"",by:DEFAULT_BY,ref:""}; addBoxToStore(box); renderLibrary(); alert("Box imported."); }
-          else alert("That doesn't look like a morphological-box file.");
+          var it = data&&data.item ? data.item : (data&&data.box ? (data.box.kind="box",data.box) : (data&&data.params ? (data.kind="box",data) : (data&&data.kind?data:null)));
+          if(it&&(it.params||it.concepts)){ it.id=nid(it.kind||"box"); it.kind=it.kind||(it.concepts?"matrix":"box"); it.createdAt=it.createdAt||Date.now(); it.updatedAt=Date.now(); if(!it.meta) it.meta=baseMeta(); addItem(it); renderLibrary(); alert("Imported."); }
+          else alert("That doesn't look like a box or matrix file.");
         }
       }catch(err){ alert("Couldn't read that file: "+err.message); }
       pendingImport=null; e.target.value="";
@@ -612,31 +961,28 @@
     r.readAsText(f);
   });
 
-  /* ---------- buttons ---------- */
-  document.getElementById("newbox").addEventListener("click",function(){ var b=newBox(); addBoxToStore(b); openBox(b.id); });
-  document.getElementById("importbox").addEventListener("click",importBoxFlow);
-  document.getElementById("backupall").addEventListener("click",function(){ download("VG_morphbox_backup_"+fmtDate(Date.now())+".json",store); });
-  document.getElementById("restoreall").addEventListener("click",restoreAllFlow);
+  /* buttons */
+  document.getElementById("newbox").addEventListener("click",function(){ var b=newBox(); addItem(b); openItem(b.id); });
+  document.getElementById("newmatrix").addEventListener("click",function(){ var m=newMatrix(); addItem(m); openItem(m.id); });
+  document.getElementById("importbox").addEventListener("click",importFlow);
+  document.getElementById("backupall").addEventListener("click",function(){ download("VG_tools_backup_"+fmtDate(Date.now())+".json",store); });
+  document.getElementById("restoreall").addEventListener("click",restoreFlow);
   document.getElementById("backbtn").addEventListener("click",function(){ history.replaceState(null,"","#"); showLibrary(); });
-  document.getElementById("addpath").addEventListener("click",function(){ if(current.paths.length>=4) return; var n=current.paths.length; current.paths.push({id:nid("path"),label:LABELS[n],name:"Path "+LABELS[n],color:COLORS[n],rationale:"",sel:{}}); renderTabs(); renderCards(); persist(); });
-  document.getElementById("addrow").addEventListener("click",function(){ current.params.push({id:nid("p"),name:"",options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}]}); renderBox(); renderCards(); updateCounter(); persist(); });
+  document.getElementById("addpath").addEventListener("click",function(){ if(current.kind!=="box"||current.paths.length>=4) return; var n=current.paths.length; current.paths.push({id:nid("path"),label:LABELS[n],name:"Path "+LABELS[n],color:COLORS[n],rationale:"",sel:{}}); renderTabs(); renderCards(); persist(); });
+  document.getElementById("addrow").addEventListener("click",function(){ if(current.kind!=="box") return; current.params.push({id:nid("p"),name:"",options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}]}); renderBox(); renderCards(); updateCounter(); persist(); });
   document.getElementById("printbtn").addEventListener("click",function(){ window.print(); });
-  document.getElementById("exportbtn").addEventListener("click",function(){ if(current) exportBox(current); });
+  document.getElementById("exportbtn").addEventListener("click",function(){ if(current) exportItem(current); });
   document.getElementById("sharebtn").addEventListener("click",function(){ if(current) copyShare(current); });
-  document.getElementById("savecopy").addEventListener("click",function(){
-    if(!current) return;
-    var copy=JSON.parse(JSON.stringify(current)); copy.id=nid("box"); copy.createdAt=Date.now(); copy.updatedAt=Date.now();
-    isShared=false; addBoxToStore(copy); openBox(copy.id);
-  });
+  document.getElementById("savecopy").addEventListener("click",function(){ if(!current) return; var copy=JSON.parse(JSON.stringify(current)); copy.id=nid(current.kind); copy.createdAt=Date.now(); copy.updatedAt=Date.now(); isShared=false; addItem(copy); openItem(copy.id); });
 
-  /* ---------- router ---------- */
+  /* router */
   function route(){
     var h=location.hash||"";
     if(h.indexOf("#data=")===0){
-      try{ var b=JSON.parse(fromB64(h.slice(6))); if(b&&b.params){ if(!b.paths) b.paths=[]; showEditor(b,true); return; } }catch(e){}
+      try{ var it=JSON.parse(fromB64(h.slice(6))); if(it&&(it.params||it.concepts)){ it.kind=it.kind||(it.concepts?"matrix":"box"); if(it.kind==="box"&&!it.paths) it.paths=[]; showEditor(it,true); return; } }catch(e){}
       showLibrary(); return;
     }
-    if(h.indexOf("#box/")===0){ var id=h.slice(5); if(store.boxes[id]){ showEditor(store.boxes[id],false); return; } }
+    if(h.indexOf("#item/")===0){ var id=h.slice(6); if(store.items[id]){ showEditor(store.items[id],false); return; } }
     showLibrary();
   }
   window.addEventListener("hashchange",route);
