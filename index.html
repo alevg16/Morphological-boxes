@@ -235,6 +235,48 @@
   .sens .verdict.mod{background:rgba(181,113,44,.1);color:#7A4E1E;}
   .sens .verdict.fragile{background:rgba(181,70,44,.1);color:#7A2E1E;}
 
+  /* ---- intake scaffold (ochre accent) ---- */
+  .btn.ochre{border-color:var(--pC);color:var(--pC);}
+  .btn.ochre:hover{background:var(--pC);color:#fff;}
+  .btn.ochre.solid{background:var(--pC);color:#fff;}
+  .bxcard.intake{border-top-color:var(--pC);}
+  .bxcard.intake .kind{background:var(--pC);}
+  .crumb .kindtag.intake{background:var(--pC);}
+  .note.ochre{border-left-color:var(--pC);}
+  .note.ochre .label{color:var(--pC);}
+  .intsec{padding:24px 40px 4px;}
+  .intsec .label{display:block;margin-bottom:8px;color:var(--pC);}
+  .intsec h3{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--ink);margin-bottom:3px;}
+  .intsec .hint{font-size:13px;color:var(--steel);margin-bottom:10px;max-width:64ch;}
+  .intsec textarea,.intsec input.iv{width:100%;max-width:780px;border:1px solid var(--hairline);background:#FBFCFE;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;color:var(--ink);padding:10px 12px;resize:vertical;line-height:1.5;outline:none;}
+  .intsec textarea:focus,.intsec input.iv:focus{border-color:var(--pC);}
+  .intsec textarea.raw{min-height:110px;font-family:'IBM Plex Mono',monospace;font-size:13px;}
+  .intsec textarea.sm{min-height:60px;}
+  .twocol-int{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:900px;}
+  .twocol-int .colh{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-bottom:6px;}
+  @media(max-width:760px){.twocol-int{grid-template-columns:1fr;gap:10px;}}
+  .ilist{max-width:780px;display:flex;flex-direction:column;gap:7px;}
+  .ilist .irow{display:flex;align-items:center;gap:8px;}
+  .ilist .irow .num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);width:22px;flex:none;}
+  .ilist .irow input{flex:1 1 auto;border:1px solid var(--hairline);background:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--ink);padding:7px 9px;outline:none;}
+  .ilist .irow input:focus{border-color:var(--pC);}
+  .ilist .irow .irm{border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:15px;flex:none;}
+  .ilist .irow .irm:hover{color:#C0392B;}
+  .iadd{margin-top:9px;border:1px dashed var(--hairline);background:none;color:var(--steel);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:7px 11px;}
+  .iadd:hover{border-color:var(--pC);color:var(--pC);}
+  .assembled{margin:18px 40px 6px;border:1px solid var(--hairline);border-top:3px solid var(--pC);max-width:820px;}
+  .assembled .ahd{padding:12px 16px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .assembled .ahd .label{color:var(--pC);}
+  .assembled .ahd .grow{flex:1 1 auto;}
+  .assembled .abody{padding:16px 18px;}
+  .assembled .abody .blk{margin-bottom:18px;}
+  .assembled .abody .blk:last-child{margin-bottom:0;}
+  .assembled .abody .sk{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);display:block;margin-bottom:6px;}
+  .assembled .abody p{font-size:14.5px;color:#27313D;white-space:pre-wrap;}
+  .assembled .abody ul{margin:0 0 0 18px;font-size:14.5px;color:#27313D;}
+  .assembled .abody li{margin-top:4px;}
+  .assembled .abody .empty{color:#B9C2CE;}
+
   footer{background:var(--navy);color:#C8D4E2;padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:13px;}
   footer .label{color:#9FB3C9;}
   footer a{color:#C8D4E2;text-decoration:none;}
@@ -293,12 +335,13 @@
     <div class="page-head">
       <p class="label" style="margin-bottom:18px;">Working record · Concept generation &amp; selection</p>
       <h1>Every design you've explored, in one place.</h1>
-      <p class="lede"><strong>Morphological boxes</strong> open up the design space and let you trace 3–4 distinct concepts. <strong>Decision matrices</strong> compare those concepts honestly and test whether the choice holds up. Build them here as thinking tools — then export or share any one so a client can keep working on it.</p>
+      <p class="lede"><strong>Intake scaffolds</strong> turn a client's raw answers into a clean study opening. <strong>Morphological boxes</strong> open up the design space and trace 3–4 distinct concepts. <strong>Decision matrices</strong> compare those concepts honestly and test whether the choice holds. Build them here — then export or share any one so a client can keep working on it.</p>
     </div>
 
     <div class="libactions">
       <button class="btn solid" id="newbox" type="button">+ New morphological box</button>
       <button class="btn teal solid" id="newmatrix" type="button">+ New decision matrix</button>
+      <button class="btn ochre solid" id="newintake" type="button">+ New intake scaffold</button>
       <span class="grow"></span>
       <button class="btn ghost" id="importbox" type="button">Import (.json)</button>
       <button class="btn ghost" id="backupall" type="button">Back up all</button>
@@ -309,6 +352,7 @@
       <button class="ftab active" data-f="all" type="button">All</button>
       <button class="ftab" data-f="box" type="button">Boxes</button>
       <button class="ftab" data-f="matrix" type="button">Matrices</button>
+      <button class="ftab" data-f="intake" type="button">Intake</button>
     </div>
 
     <div class="liblist" id="liblist"></div>
@@ -399,6 +443,79 @@
       </div>
     </div>
 
+    <!-- INTAKE BODY -->
+    <div id="body-intake" style="display:none;">
+      <div class="note ochre">
+        <span class="label">What this is — and what it won't do</span>
+        <p>This is the front end of a study: it turns a client's raw intake into the opening sections — the problem restated in <em>your</em> words, the constraints pinned, and what "solved" actually means. That part is stable whatever the job turns out to be, and it's the same retyping every time. The assembled block at the bottom drops straight into the study template.</p>
+        <p>It doesn't do the thinking for you. The restatement is where your judgement goes in — the tool just gives you the structure and saves the keystrokes. Paste the client's answers verbatim into the raw box first, so you always have the source.</p>
+      </div>
+
+      <div class="intsec">
+        <span class="label">Raw intake — paste verbatim</span>
+        <h3>The client's own words</h3>
+        <p class="hint">Paste the Tally response (or the notification email) here untouched. This is your source of record; everything below is your structuring of it.</p>
+        <textarea class="raw" data-int="rawIntake" data-assemble="0" placeholder="Paste the full intake response here…"></textarea>
+      </div>
+
+      <div class="intsec">
+        <span class="label">01 · Problem</span>
+        <h3>Restate it in your words</h3>
+        <p class="hint">Keep their version on the left for fidelity; write yours on the right. Your restatement is what confirms alignment and protects you if scope drifts.</p>
+        <div class="twocol-int">
+          <div><div class="colh">Client's statement</div><textarea class="sm" data-int="problemRaw" data-assemble="0" placeholder="As the client described it…"></textarea></div>
+          <div><div class="colh">Problem as I understand it</div><textarea class="sm" data-int="problemRestated" placeholder="The problem in my words…"></textarea></div>
+        </div>
+      </div>
+
+      <div class="intsec">
+        <span class="label">02 · Constraints</span>
+        <h3>What the design must respect</h3>
+        <p class="hint">The yardstick every concept is judged against. Paste several at once (one per line) into any field to split them into separate items.</p>
+        <div class="ilist" id="constraintsmount"></div>
+        <button class="iadd" id="add-constraint" type="button">+ add constraint</button>
+      </div>
+
+      <div class="intsec">
+        <span class="label">02 · Success criteria</span>
+        <h3>What "solved" means</h3>
+        <p class="hint">Concrete, ideally measurable. If a concept can't be judged against it, it isn't a criterion yet.</p>
+        <div class="ilist" id="criteriamount"></div>
+        <button class="iadd" id="add-criterion" type="button">+ add criterion</button>
+      </div>
+
+      <div class="intsec">
+        <span class="label">Context</span>
+        <h3>Background &amp; current approach</h3>
+        <p class="hint">What's been tried, what's carrying the project now, why a decision is live.</p>
+        <textarea class="sm" data-int="context" placeholder="Background, history, why this is on the table now…"></textarea>
+        <div style="height:10px;"></div>
+        <textarea class="sm" data-int="tried" placeholder="What they've already tried or ruled out…"></textarea>
+      </div>
+
+      <div class="intsec">
+        <span class="label">Scope &amp; timing</span>
+        <h3>Boundaries and the decision clock</h3>
+        <p class="hint">Out-of-scope keeps you honest later; the decision deadline is the "before you commit" trigger that makes the study urgent.</p>
+        <textarea class="sm" data-int="outOfScope" placeholder="Explicitly out of scope / non-goals…"></textarea>
+        <div style="height:10px;"></div>
+        <textarea class="sm" data-int="timeline" placeholder="Decision deadline, budget signal, what's downstream of the choice…"></textarea>
+        <div style="height:10px;"></div>
+        <textarea class="sm" data-int="risks" placeholder="Open questions / unknowns to flag…"></textarea>
+      </div>
+
+      <div class="assembled">
+        <div class="ahd">
+          <span class="label">Assembled opening</span>
+          <span class="grow"></span>
+          <button class="btn ochre sm" id="copy-opening" type="button">Copy all</button>
+          <button class="btn ochre ghost sm" id="copy-restated" type="button">Copy restatement</button>
+          <button class="btn ochre ghost sm" id="copy-constraints" type="button">Copy constraints</button>
+        </div>
+        <div class="abody" id="assembledmount"></div>
+      </div>
+    </div>
+
   </section>
 
   <span class="grow"></span>
@@ -467,6 +584,12 @@
     var now=Date.now();
     return {id:nid("mx"),kind:"matrix",createdAt:now,updatedAt:now,meta:baseMeta(),scale:"pugh",datum:concepts[0].id,concepts:concepts,criteria:criteria,scores:scores,recommendation:""};
   }
+  function newIntake(){
+    var now=Date.now();
+    return {id:nid("int"),kind:"intake",createdAt:now,updatedAt:now,meta:baseMeta(),
+      rawIntake:"",problemRaw:"",problemRestated:"",context:"",tried:"",outOfScope:"",timeline:"",risks:"",
+      constraints:[""],criteria:[""]};
+  }
   function addItem(it){ store.items[it.id]=it; store.order.unshift(it.id); persist(); }
   function deleteItem(id){ delete store.items[id]; var i=store.order.indexOf(id); if(i>-1) store.order.splice(i,1); persist(); }
 
@@ -500,13 +623,16 @@
     document.getElementById("sharedbanner").classList.toggle("show",isShared);
     document.getElementById("savedtag").textContent= isShared? "" : (STORAGE_OK?"Saved":"Not saved (preview)");
     var kt=document.getElementById("kindtag");
-    kt.textContent= it.kind==="matrix"?"Decision matrix":"Morphological box";
+    kt.textContent= it.kind==="matrix"?"Decision matrix":(it.kind==="intake"?"Intake scaffold":"Morphological box");
     kt.classList.toggle("matrix", it.kind==="matrix");
+    kt.classList.toggle("intake", it.kind==="intake");
     Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){ el.textContent=it.meta[el.dataset.meta]||""; });
     document.getElementById("body-box").style.display = it.kind==="box"?"":"none";
     document.getElementById("body-matrix").style.display = it.kind==="matrix"?"":"none";
+    document.getElementById("body-intake").style.display = it.kind==="intake"?"":"none";
     if(it.kind==="box"){ activePath=it.paths.length?it.paths[0].id:null; renderTabs(); renderBox(); renderCards(); updateCounter(); }
-    else { mxInit(); }
+    else if(it.kind==="matrix"){ mxInit(); }
+    else { intInit(); }
     window.scrollTo(0,0);
   }
 
@@ -518,11 +644,14 @@
     if(!ids.length){ empty.style.display=""; return; }
     empty.style.display="none";
     ids.forEach(function(id){
-      var it=store.items[id]; var isMx=it.kind==="matrix";
-      var card=document.createElement("div"); card.className="bxcard"+(isMx?" matrix":"");
+      var it=store.items[id]; var kc=it.kind;
+      var kindClass = kc==="matrix"?" matrix":(kc==="intake"?" intake":"");
+      var kindLabel = kc==="matrix"?"Matrix":(kc==="intake"?"Intake":"Box");
+      var untitled = kc==="matrix"?"Untitled matrix":(kc==="intake"?"Untitled intake":"Untitled box");
+      var card=document.createElement("div"); card.className="bxcard"+kindClass;
       var body=document.createElement("div"); body.className="bxbody";
-      var kind=document.createElement("span"); kind.className="kind"; kind.textContent=isMx?"Matrix":"Box";
-      var nm=document.createElement("div"); nm.className="bxname"; nm.textContent=it.meta.project||(isMx?"Untitled matrix":"Untitled box");
+      var kind=document.createElement("span"); kind.className="kind"; kind.textContent=kindLabel;
+      var nm=document.createElement("div"); nm.className="bxname"; nm.textContent=it.meta.project||untitled;
       var cl=document.createElement("div"); cl.className="bxclient"; cl.textContent=it.meta.for||"—";
       var meta=document.createElement("div"); meta.className="bxmeta"; meta.textContent=summaryLine(it)+" · "+fmtDate(it.updatedAt);
       body.appendChild(kind); body.appendChild(nm); body.appendChild(cl); body.appendChild(meta);
@@ -541,6 +670,11 @@
     if(it.kind==="matrix"){
       var lead=mxLeaderName(it);
       return it.concepts.length+" concepts · "+it.criteria.length+" criteria · leads: "+(lead||"—");
+    }
+    if(it.kind==="intake"){
+      var cs=(it.constraints||[]).filter(function(x){ return (x||"").trim(); }).length;
+      var sc=(it.criteria||[]).filter(function(x){ return (x||"").trim(); }).length;
+      return cs+" constraints · "+sc+" criteria · "+((it.problemRestated||"").trim()?"restated ✓":"not yet restated");
     }
     var traced=0; it.paths.forEach(function(p){ if(Object.keys(p.sel).length) traced++; });
     return it.params.length+" sub-functions · "+it.paths.length+" paths · "+traced+" traced";
@@ -913,6 +1047,66 @@
   document.getElementById("mxrec").addEventListener("input",function(){ if(current&&current.kind==="matrix"){ current.recommendation=this.value; persist(); } });
 
   /* ========================================================= */
+  /*  INTAKE SCAFFOLD                                          */
+  /* ========================================================= */
+  function intInit(){
+    Array.prototype.forEach.call(document.querySelectorAll("[data-int]"),function(el){ el.value=current[el.dataset.int]||""; });
+    intRenderList("constraints","constraintsmount");
+    intRenderList("criteria","criteriamount");
+    intAssemble();
+  }
+  function intRenderList(key,mountId){
+    var mount=document.getElementById(mountId); mount.innerHTML="";
+    if(!current[key]||!current[key].length) current[key]=[""];
+    current[key].forEach(function(val,idx){
+      var row=document.createElement("div"); row.className="irow";
+      var num=document.createElement("span"); num.className="num"; num.textContent=(idx+1<10?"0":"")+(idx+1);
+      var inp=document.createElement("input"); inp.type="text"; inp.value=val; inp.setAttribute("placeholder", key==="constraints"?"e.g. must fit existing 80 mm bore":"e.g. cuts changeover time below 5 min");
+      inp.addEventListener("input",function(){ current[key][idx]=inp.value; persist(); intAssemble(); });
+      inp.addEventListener("paste",function(e){
+        var txt=(e.clipboardData||window.clipboardData).getData("text/plain");
+        if(txt && /\r|\n/.test(txt)){
+          e.preventDefault();
+          var parts=txt.split(/\r?\n/).map(function(s){ return s.replace(/^[-*•\d.\)\s]+/,"").trim(); }).filter(Boolean);
+          if(parts.length){ current[key][idx]=parts[0]; for(var i=1;i<parts.length;i++) current[key].splice(idx+i,0,parts[i]); persist(); intRenderList(key,mountId); intAssemble(); }
+        }
+      });
+      var rm=document.createElement("button"); rm.className="irm"; rm.type="button"; rm.innerHTML="&times;"; rm.title="Remove";
+      rm.addEventListener("click",function(){ current[key].splice(idx,1); if(!current[key].length) current[key]=[""]; persist(); intRenderList(key,mountId); intAssemble(); });
+      row.appendChild(num); row.appendChild(inp); row.appendChild(rm); mount.appendChild(row);
+    });
+  }
+  function listClean(key){ return (current[key]||[]).map(function(s){ return (s||"").trim(); }).filter(Boolean); }
+  function intAssemble(){
+    var mount=document.getElementById("assembledmount"); if(!mount) return; mount.innerHTML="";
+    function blk(sk,build){ var d=document.createElement("div"); d.className="blk"; var s=document.createElement("span"); s.className="sk"; s.textContent=sk; d.appendChild(s); build(d); mount.appendChild(d); }
+    function para(parent,txt){ var p=document.createElement("p"); if(txt){ p.textContent=txt; } else { p.className="empty"; p.textContent="—"; } parent.appendChild(p); }
+    blk("01 · Problem as I understand it",function(d){ para(d, (current.problemRestated||"").trim()||(current.problemRaw||"").trim()); });
+    blk("02 · Constraints",function(d){ var cs=listClean("constraints"); if(cs.length){ var ul=document.createElement("ul"); cs.forEach(function(c){ var li=document.createElement("li"); li.textContent=c; ul.appendChild(li); }); d.appendChild(ul); } else para(d,""); });
+    blk("02 · Success criteria",function(d){ var sc=listClean("criteria"); if(sc.length){ var ul=document.createElement("ul"); sc.forEach(function(c){ var li=document.createElement("li"); li.textContent=c; ul.appendChild(li); }); d.appendChild(ul); } else para(d,""); });
+    if((current.outOfScope||"").trim()) blk("Out of scope",function(d){ para(d,current.outOfScope.trim()); });
+    if((current.timeline||"").trim()) blk("Decision context / timing",function(d){ para(d,current.timeline.trim()); });
+    if((current.risks||"").trim()) blk("Open questions / unknowns",function(d){ para(d,current.risks.trim()); });
+  }
+  function intOpeningText(){
+    var L=[];
+    L.push("01  PROBLEM AS I UNDERSTAND IT","");
+    L.push((current.problemRestated||"").trim()||(current.problemRaw||"").trim()||"—","");
+    L.push("02  CONSTRAINTS & SUCCESS CRITERIA","");
+    var cs=listClean("constraints"); L.push("Constraints:"); if(cs.length) cs.forEach(function(c){ L.push("- "+c); }); else L.push("- —"); L.push("");
+    var sc=listClean("criteria"); L.push("Success criteria (what \"solved\" means):"); if(sc.length) sc.forEach(function(c){ L.push("- "+c); }); else L.push("- —");
+    if((current.outOfScope||"").trim()){ L.push("","Out of scope: "+current.outOfScope.trim()); }
+    if((current.timeline||"").trim()){ L.push("","Decision context / timing: "+current.timeline.trim()); }
+    if((current.risks||"").trim()){ L.push("","Open questions / unknowns: "+current.risks.trim()); }
+    return L.join("\n");
+  }
+  function copyText(txt,msg){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ flashCopied(msg); },function(){ prompt("Copy:",txt); }); }
+    else prompt("Copy:",txt);
+  }
+  function flashCopied(msg){ var t=document.getElementById("savedtag"); if(t){ var old=t.textContent; t.textContent=msg||"Copied ✓"; t.style.color="#2E7D52"; setTimeout(function(){ t.style.color="var(--steel)"; t.textContent=old||"Saved"; },1100); } }
+
+  /* ========================================================= */
   /*  SHARED: paste / meta / export / import / share / router  */
   /* ========================================================= */
   document.addEventListener("paste",function(e){
@@ -925,6 +1119,14 @@
   Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){
     el.addEventListener("input",function(){ if(current){ current.meta[el.dataset.meta]=el.textContent; persist(); } });
   });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-int]"),function(el){
+    el.addEventListener("input",function(){ if(current&&current.kind==="intake"){ current[el.dataset.int]=el.value; persist(); if(el.dataset.assemble!=="0") intAssemble(); } });
+  });
+  document.getElementById("add-constraint").addEventListener("click",function(){ if(current&&current.kind==="intake"){ current.constraints.push(""); intRenderList("constraints","constraintsmount"); persist(); } });
+  document.getElementById("add-criterion").addEventListener("click",function(){ if(current&&current.kind==="intake"){ current.criteria.push(""); intRenderList("criteria","criteriamount"); persist(); } });
+  document.getElementById("copy-opening").addEventListener("click",function(){ if(current&&current.kind==="intake") copyText(intOpeningText(),"Opening copied ✓"); });
+  document.getElementById("copy-restated").addEventListener("click",function(){ if(current&&current.kind==="intake") copyText((current.problemRestated||"").trim()||(current.problemRaw||"").trim(),"Restatement copied ✓"); });
+  document.getElementById("copy-constraints").addEventListener("click",function(){ if(current&&current.kind==="intake") copyText(listClean("constraints").map(function(c){ return "- "+c; }).join("\n"),"Constraints copied ✓"); });
 
   function toB64(str){ var b=new TextEncoder().encode(str),s=""; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
   function fromB64(b64){ var bin=atob(b64),b=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i); return new TextDecoder().decode(b); }
@@ -952,8 +1154,8 @@
           else alert("That doesn't look like a full backup file.");
         } else {
           var it = data&&data.item ? data.item : (data&&data.box ? (data.box.kind="box",data.box) : (data&&data.params ? (data.kind="box",data) : (data&&data.kind?data:null)));
-          if(it&&(it.params||it.concepts)){ it.id=nid(it.kind||"box"); it.kind=it.kind||(it.concepts?"matrix":"box"); it.createdAt=it.createdAt||Date.now(); it.updatedAt=Date.now(); if(!it.meta) it.meta=baseMeta(); addItem(it); renderLibrary(); alert("Imported."); }
-          else alert("That doesn't look like a box or matrix file.");
+          if(it&&(it.params||it.concepts||it.kind==="intake")){ it.id=nid(it.kind||"box"); it.kind=it.kind||(it.concepts?"matrix":"box"); it.createdAt=it.createdAt||Date.now(); it.updatedAt=Date.now(); if(!it.meta) it.meta=baseMeta(); addItem(it); renderLibrary(); alert("Imported."); }
+          else alert("That doesn't look like a box, matrix, or intake file.");
         }
       }catch(err){ alert("Couldn't read that file: "+err.message); }
       pendingImport=null; e.target.value="";
@@ -964,6 +1166,7 @@
   /* buttons */
   document.getElementById("newbox").addEventListener("click",function(){ var b=newBox(); addItem(b); openItem(b.id); });
   document.getElementById("newmatrix").addEventListener("click",function(){ var m=newMatrix(); addItem(m); openItem(m.id); });
+  document.getElementById("newintake").addEventListener("click",function(){ var i=newIntake(); addItem(i); openItem(i.id); });
   document.getElementById("importbox").addEventListener("click",importFlow);
   document.getElementById("backupall").addEventListener("click",function(){ download("VG_tools_backup_"+fmtDate(Date.now())+".json",store); });
   document.getElementById("restoreall").addEventListener("click",restoreFlow);
@@ -979,14 +1182,38 @@
   function route(){
     var h=location.hash||"";
     if(h.indexOf("#data=")===0){
-      try{ var it=JSON.parse(fromB64(h.slice(6))); if(it&&(it.params||it.concepts)){ it.kind=it.kind||(it.concepts?"matrix":"box"); if(it.kind==="box"&&!it.paths) it.paths=[]; showEditor(it,true); return; } }catch(e){}
+      try{ var it=JSON.parse(fromB64(h.slice(6))); if(it&&(it.params||it.concepts||it.kind==="intake")){ it.kind=it.kind||(it.concepts?"matrix":"box"); if(it.kind==="box"&&!it.paths) it.paths=[]; showEditor(it,true); return; } }catch(e){}
       showLibrary(); return;
     }
     if(h.indexOf("#item/")===0){ var id=h.slice(6); if(store.items[id]){ showEditor(store.items[id],false); return; } }
     showLibrary();
   }
+
+  /* URL prefill — lets a Tally redirect (or a hand-built link) open a pre-filled intake.
+     Params: ?vgintake=1 &client= &oneliner= &problem= &restated= &context= &tried=
+             &constraints=a|b|c &criteria=a|b|c &scope= &timeline= &risks= &raw=        */
+  function urlPrefill(){
+    var q=location.search; if(!q) return false;
+    var p=new URLSearchParams(q);
+    var triggers=["vgintake","problem","oneliner","constraints","criteria","raw"];
+    var hit=triggers.some(function(k){ return p.has(k); });
+    if(!hit) return false;
+    var it=newIntake();
+    if(p.get("oneliner")) it.meta.project=p.get("oneliner");
+    if(p.get("client")) it.meta.for=p.get("client");
+    ["problem|problemRaw","restated|problemRestated","context|context","tried|tried","scope|outOfScope","timeline|timeline","risks|risks","raw|rawIntake"].forEach(function(m){
+      var a=m.split("|"); if(p.get(a[0])) it[a[1]]=p.get(a[0]);
+    });
+    if(p.get("constraints")) it.constraints=p.get("constraints").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+    if(p.get("criteria")) it.criteria=p.get("criteria").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+    if(!it.constraints.length) it.constraints=[""]; if(!it.criteria.length) it.criteria=[""];
+    addItem(it);
+    history.replaceState(null,"",location.pathname+"#item/"+it.id); // drop the query so refresh doesn't duplicate
+    return true;
+  }
+
   window.addEventListener("hashchange",route);
-  route();
+  if(!urlPrefill()) route(); else route();
 })();
 </script>
 </body>
