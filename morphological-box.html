@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morphological box — VG Engineering</title>
+<meta name="description" content="A VG Engineering working template: decompose a mechanical problem into its sub-functions, lay out the candidate solution principles for each, and trace 3–4 genuinely different paths through the box — the concepts that go into the study.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E2A4A;
+    --navy-deep:#081B33;
+    --ink:#0B0E13;
+    --paper:#FFFFFF;
+    --paper-dim:#F5F7FA;
+    --hairline:#D7DEE7;
+    --steel:#5A7491;
+    --focus:#1B4F8A;
+    /* path colours — restrained, desaturated, distinguishable on white */
+    --pA:#0E2A4A;
+    --pB:#1F6E7A;
+    --pC:#B5712A;
+    --pD:#5B5470;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
+  body{
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    color:var(--ink);background:var(--paper-dim);
+    line-height:1.55;font-size:16px;
+  }
+  ::selection{background:var(--navy);color:var(--paper);}
+  a{color:var(--navy);}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+
+  .sheet{
+    max-width:1140px;margin:0 auto;background:var(--paper);
+    border-left:1px solid var(--hairline);border-right:1px solid var(--hairline);
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--steel);
+  }
+
+  /* ---- header ---- */
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 40px;border-bottom:1px solid var(--hairline);
+  }
+  .wordmark{
+    font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:19px;
+    letter-spacing:.02em;color:var(--ink);text-decoration:none;
+    display:flex;align-items:baseline;gap:9px;
+  }
+  .wordmark .vg{background:var(--navy);color:var(--paper);padding:2px 8px 3px;}
+  header .tool{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--steel);}
+
+  /* ---- page head ---- */
+  .page-head{padding:54px 40px 30px;border-bottom:1px solid var(--hairline);}
+  .page-head h1{
+    font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;
+    font-size:clamp(30px,4.4vw,46px);line-height:1.05;max-width:20ch;
+  }
+  .page-head .lede{margin-top:16px;max-width:66ch;font-size:17px;color:#27313D;}
+  .page-head .lede strong{color:var(--ink);}
+
+  .note{
+    margin-top:22px;border:1px solid var(--hairline);border-left:3px solid var(--navy);
+    background:var(--paper-dim);padding:18px 22px;max-width:760px;
+  }
+  .note .label{display:block;margin-bottom:7px;color:var(--navy);}
+  .note p{font-size:14.5px;color:#27313D;}
+  .note p + p{margin-top:9px;}
+
+  /* ---- title block (editable cover) ---- */
+  .titleblock{
+    margin:0;display:grid;grid-template-columns:repeat(2,1fr);
+    border-bottom:1px solid var(--hairline);
+  }
+  .tb-cell{
+    padding:14px 40px;border-top:1px solid var(--hairline);
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .tb-cell:nth-child(odd){border-right:1px solid var(--hairline);}
+  .tb-cell .label{font-size:10.5px;}
+  .ed{
+    font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;color:var(--ink);
+    outline:none;min-height:1.5em;
+  }
+  .ed:empty:before{content:attr(data-ph);color:#A9B4C2;}
+  .ed:focus{background:#FBFCFE;box-shadow:inset 0 -2px 0 var(--navy);}
+
+  /* ---- toolbar ---- */
+  .toolbar{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;
+    padding:18px 40px;border-bottom:1px solid var(--hairline);background:var(--paper);
+    position:sticky;top:0;z-index:6;
+  }
+  .toolbar .tlabel{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--steel);}
+  .pathtabs{display:flex;flex-wrap:wrap;gap:8px;}
+  .ptab{
+    display:flex;align-items:center;gap:7px;border:1px solid var(--hairline);
+    background:var(--paper);padding:6px 9px 6px 7px;cursor:pointer;user-select:none;
+  }
+  .ptab.active{border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy);}
+  .ptab .sw{width:13px;height:13px;flex:none;border-radius:2px;}
+  .ptab .pname{
+    font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:13.5px;
+    outline:none;min-width:46px;color:var(--ink);
+  }
+  .ptab .pname:focus{box-shadow:inset 0 -2px 0 currentColor;}
+  .ptab .pclr{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);
+    background:none;border:none;cursor:pointer;padding:2px 3px;
+  }
+  .btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.03em;
+    border:1px solid var(--navy);background:var(--paper);color:var(--navy);
+    padding:7px 13px;cursor:pointer;
+  }
+  .btn:hover{background:var(--navy);color:var(--paper);}
+  .btn.solid{background:var(--navy);color:var(--paper);}
+  .btn.solid:hover{background:var(--navy-deep);}
+  .btn.ghost{border-color:var(--hairline);color:var(--steel);}
+  .btn.ghost:hover{background:var(--paper-dim);color:var(--navy);border-color:var(--steel);}
+  .spacer{flex:1 1 auto;}
+  .hint{font-size:12.5px;color:var(--steel);}
+
+  /* ---- the box ---- */
+  .box{padding:8px 40px 16px;}
+  .row{
+    display:flex;align-items:stretch;gap:0;
+    border:1px solid var(--hairline);border-top:none;
+  }
+  .row.first{border-top:1px solid var(--hairline);}
+  .rownum{
+    flex:none;width:40px;display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);
+    background:var(--paper-dim);border-right:1px solid var(--hairline);
+  }
+  .param{
+    flex:none;width:210px;border-right:1px solid var(--hairline);
+    padding:11px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;
+    background:#FBFCFE;
+  }
+  .param .pk{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--steel);}
+  .param .ped{
+    font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:15px;
+    color:var(--navy);outline:none;line-height:1.25;
+  }
+  .param .ped:empty:before{content:attr(data-ph);color:#A9B4C2;font-weight:400;
+    font-family:'IBM Plex Sans',sans-serif;font-size:13px;}
+  .param .ped:focus{box-shadow:inset 0 -2px 0 var(--navy);}
+  .opts{
+    flex:1 1 auto;display:flex;flex-wrap:wrap;align-content:center;gap:8px;
+    padding:10px 12px;min-width:0;
+  }
+  .opt{
+    display:flex;align-items:center;gap:6px;
+    border:1px solid var(--hairline);background:var(--paper);
+    padding:5px 7px 5px 5px;max-width:100%;position:relative;
+  }
+  .opt .dot{
+    width:15px;height:15px;flex:none;border-radius:50%;border:1.5px solid var(--steel);
+    background:var(--paper);cursor:pointer;padding:0;position:relative;
+  }
+  .opt .dot:hover{border-color:var(--navy);}
+  .opt .otext{
+    font-size:13.5px;outline:none;min-width:30px;color:var(--ink);line-height:1.3;
+    word-break:break-word;
+  }
+  .opt .otext:empty:before{content:attr(data-ph);color:#A9B4C2;}
+  .opt .otext:focus{box-shadow:inset 0 -2px 0 var(--navy);}
+  .opt .orm{
+    border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:14px;
+    line-height:1;padding:0 1px;flex:none;
+  }
+  .opt .orm:hover{color:#C0392B;}
+  .opt .tags{display:flex;gap:3px;flex:none;}
+  .opt .tags .t{
+    width:14px;height:14px;border-radius:2px;display:flex;align-items:center;
+    justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;
+    font-weight:500;color:#fff;
+  }
+  .opt.sel{box-shadow:0 0 0 2px var(--selclr);border-color:var(--selclr);}
+  .addopt{
+    border:1px dashed var(--hairline);background:none;color:var(--steel);cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;font-size:12px;padding:6px 9px;
+  }
+  .addopt:hover{border-color:var(--navy);color:var(--navy);}
+  .rowrm{
+    flex:none;width:30px;border-left:1px solid var(--hairline);background:var(--paper-dim);
+    color:#B9C2CE;cursor:pointer;font-size:15px;line-height:1;
+  }
+  .rowrm:hover{color:#C0392B;background:#FBEDEC;}
+  .addrow-wrap{padding:0 40px 8px;}
+  .addrow{
+    width:100%;border:1px dashed var(--hairline);background:none;color:var(--steel);
+    cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;
+    letter-spacing:.06em;text-transform:uppercase;padding:11px;
+  }
+  .addrow:hover{border-color:var(--navy);color:var(--navy);}
+
+  /* ---- summary ---- */
+  .summary{padding:40px 40px 20px;border-top:1px solid var(--hairline);margin-top:18px;}
+  .summary .label{display:block;margin-bottom:6px;}
+  .summary h2{
+    font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;
+    font-size:clamp(22px,3vw,30px);line-height:1.1;color:var(--ink);
+  }
+  .summary .sub{margin-top:7px;max-width:64ch;color:#3A4350;font-size:15px;}
+  .pathcards{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;}
+  .pcard{border:1px solid var(--hairline);border-top:3px solid var(--pcclr);}
+  .pcard .pchead{padding:13px 15px;border-bottom:1px solid var(--hairline);
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  .pcard .pchead .pcname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;
+    font-size:17px;color:var(--pcclr);}
+  .pcard .pchead .pccount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);}
+  .pcard table{width:100%;border-collapse:collapse;font-size:13px;}
+  .pcard td{padding:7px 15px;border-bottom:1px solid #EAEFF4;vertical-align:top;}
+  .pcard tr:last-child td{border-bottom:none;}
+  .pcard td.k{color:var(--steel);width:46%;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    letter-spacing:.02em;}
+  .pcard td.v{color:var(--ink);}
+  .pcard td.v.unset{color:#B9C2CE;}
+
+  /* ---- footer ---- */
+  footer{
+    background:var(--navy);color:#C8D4E2;padding:30px 40px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    font-size:13px;
+  }
+  footer .label{color:#9FB3C9;}
+  footer a{color:#C8D4E2;text-decoration:none;}
+  footer a:hover{text-decoration:underline;text-underline-offset:4px;}
+
+  @media(max-width:860px){
+    header,.page-head,.toolbar,.box,.addrow-wrap,.summary,footer{padding-left:20px;padding-right:20px;}
+    .tb-cell{padding-left:20px;padding-right:20px;}
+    .titleblock{grid-template-columns:1fr;}
+    .tb-cell:nth-child(odd){border-right:none;}
+    .row{flex-wrap:wrap;}
+    .param{width:auto;flex:1 1 100%;border-right:none;border-bottom:1px solid var(--hairline);}
+    .rownum{width:100%;height:26px;justify-content:flex-start;padding-left:12px;
+      border-right:none;border-bottom:1px solid var(--hairline);}
+    .rowrm{width:100%;height:28px;border-left:none;border-top:1px solid var(--hairline);}
+  }
+
+  /* ---- print ---- */
+  @media print{
+    body{background:#fff;font-size:11px;}
+    .sheet{border:none;max-width:none;}
+    .toolbar,.rowrm,.opt .orm,.opt .dot,.addopt,.addrow-wrap,.note,.hint,
+    .btn,.ptab .pclr{display:none!important;}
+    header{position:static;}
+    .toolbar{display:none!important;}
+    .box{padding:6px 20px;}
+    .page-head{padding:20px;}
+    .page-head h1{font-size:24px;}
+    .opt{padding:3px 6px;}
+    .opt.sel{box-shadow:none;border-width:1.5px;}
+    .summary{padding:20px;}
+    footer{background:#fff;color:var(--steel);border-top:1px solid var(--hairline);}
+    footer .label{color:var(--steel);}
+    .pathcards{grid-template-columns:repeat(2,1fr);}
+    a[href]:after{content:"";}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <span class="wordmark"><span class="vg">VG</span> ENGINEERING</span>
+    <span class="tool">Morphological box · working template</span>
+  </header>
+
+  <div class="page-head">
+    <p class="label" style="margin-bottom:18px;">Concept generation · Design-space map</p>
+    <h1>Break the problem into sub-functions. Lay out every way to solve each. Then trace the paths worth studying.</h1>
+    <p class="lede">A morphological box is how the design space gets <strong>widened on purpose</strong> before it's narrowed. List the sub-functions the design has to perform down the left, the candidate solution principles for each across the row, then pick one principle per row to trace a complete concept. The <strong>3–4 genuinely different paths</strong> you trace here are the concepts that go into the study.</p>
+
+    <div class="note">
+      <span class="label">How to read it — and what it won't do</span>
+      <p>The box widens the space; it doesn't choose for you. Twelve sub-functions with a handful of options each describe thousands of combinations — most of them nonsense, and not every option is compatible with every other. The value is forcing the alternatives into the open so a path is <em>chosen against the full field</em>, not defended because it was first.</p>
+      <p>Trace a path by selecting the active path (top), then clicking the dot on one option in each row. Edit any label by clicking the text. Use <strong>Print / Save as PDF</strong> to drop the finished box and its path summaries into the concept study.</p>
+    </div>
+  </div>
+
+  <!-- editable title block -->
+  <div class="titleblock">
+    <div class="tb-cell"><span class="label">Project / problem</span><span class="ed" contenteditable="true" data-meta="project" data-ph="One-line problem statement"></span></div>
+    <div class="tb-cell"><span class="label">Prepared for</span><span class="ed" contenteditable="true" data-meta="for" data-ph="Client / company"></span></div>
+    <div class="tb-cell"><span class="label">Prepared by</span><span class="ed" contenteditable="true" data-meta="by">Alejandro Vargas Gonzalez</span></div>
+    <div class="tb-cell"><span class="label">Date · Ref</span><span class="ed" contenteditable="true" data-meta="ref" data-ph="YYYY-MM-DD · REF"></span></div>
+  </div>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <span class="tlabel">Active path</span>
+    <div class="pathtabs" id="pathtabs"></div>
+    <button class="btn ghost" id="addpath" type="button">+ path</button>
+    <span class="spacer"></span>
+    <button class="btn solid" id="printbtn" type="button">Print / Save as PDF</button>
+    <button class="btn ghost" id="resetbtn" type="button">Clear selections</button>
+  </div>
+
+  <!-- box -->
+  <div class="box" id="box"></div>
+  <div class="addrow-wrap">
+    <button class="addrow" id="addrow" type="button">+ add sub-function</button>
+  </div>
+
+  <!-- path summaries -->
+  <div class="summary">
+    <span class="label">Path summaries</span>
+    <h2>The paths you've traced — concept seeds for the study</h2>
+    <p class="sub">Each filled path reads top to bottom as one complete concept: a chosen principle for every sub-function. Carry the strong, genuinely distinct ones into the concept study as Concept 1, 2, 3…</p>
+    <div class="pathcards" id="pathcards"></div>
+  </div>
+
+  <footer>
+    <span class="label">VG Engineering · Morphological box template</span>
+    <span><a href="https://vgengineering.ch">vgengineering.ch</a></span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var COLORS = ["#0E2A4A","#1F6E7A","#B5712A","#5B5470"];
+  var LABELS = ["A","B","C","D"];
+  var uid = 0; function nid(p){ uid++; return (p||"id")+uid; }
+
+  var meta = {project:"", for:"", by:"Alejandro Vargas Gonzalez", ref:""};
+
+  // 12 sub-functions, each with 3 blank option slots
+  var params = [];
+  for (var i=0;i<12;i++){
+    params.push({ id:nid("p"), name:"", options:[ {id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""} ] });
+  }
+
+  // start with 3 paths (3–4 is the house style)
+  var paths = [];
+  function addPath(){
+    if (paths.length>=4) return;
+    var n=paths.length;
+    paths.push({ id:nid("path"), label:LABELS[n], name:"Path "+LABELS[n], color:COLORS[n], sel:{} });
+  }
+  addPath(); addPath(); addPath();
+  var activePath = paths[0].id;
+
+  // ---------- helpers ----------
+  function pathById(id){ for(var i=0;i<paths.length;i++){ if(paths[i].id===id) return paths[i]; } return null; }
+  function paramById(id){ for(var i=0;i<params.length;i++){ if(params[i].id===id) return params[i]; } return null; }
+  function active(){ return pathById(activePath); }
+
+  // ---------- render: toolbar path tabs ----------
+  function renderTabs(){
+    var wrap = document.getElementById("pathtabs");
+    wrap.innerHTML="";
+    paths.forEach(function(p){
+      var tab=document.createElement("div");
+      tab.className="ptab"+(p.id===activePath?" active":"");
+      tab.style.borderColor = p.id===activePath ? p.color : "";
+      if(p.id===activePath) tab.style.boxShadow="inset 0 0 0 1px "+p.color;
+
+      var sw=document.createElement("span"); sw.className="sw"; sw.style.background=p.color;
+      var nm=document.createElement("span"); nm.className="pname"; nm.contentEditable=true;
+      nm.textContent=p.name; nm.style.color=p.color;
+      nm.addEventListener("input",function(){ p.name=nm.textContent; renderCards(); });
+      nm.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); nm.blur(); } });
+      nm.addEventListener("click",function(e){ e.stopPropagation(); });
+
+      tab.appendChild(sw); tab.appendChild(nm);
+      tab.addEventListener("click",function(){ activePath=p.id; renderTabs(); refreshAllSelections(); });
+      wrap.appendChild(tab);
+    });
+    document.getElementById("addpath").style.display = paths.length>=4 ? "none":"";
+  }
+
+  // ---------- render: the box ----------
+  function renderBox(){
+    var box=document.getElementById("box");
+    box.innerHTML="";
+    params.forEach(function(p,idx){
+      var row=document.createElement("div");
+      row.className="row"+(idx===0?" first":"");
+      row.dataset.pid=p.id;
+
+      var num=document.createElement("div"); num.className="rownum";
+      num.textContent=(idx+1<10?"0":"")+(idx+1);
+
+      var pc=document.createElement("div"); pc.className="param";
+      var pk=document.createElement("div"); pk.className="pk"; pk.textContent="Sub-function";
+      var ped=document.createElement("div"); ped.className="ped"; ped.contentEditable=true;
+      ped.setAttribute("data-ph","e.g. how the load is reacted");
+      ped.textContent=p.name;
+      ped.addEventListener("input",function(){ p.name=ped.textContent; renderCards(); });
+      pc.appendChild(pk); pc.appendChild(ped);
+
+      var opts=document.createElement("div"); opts.className="opts";
+      p.options.forEach(function(o){ opts.appendChild(buildOpt(p,o)); });
+      var add=document.createElement("button"); add.className="addopt"; add.type="button";
+      add.textContent="+ option";
+      add.addEventListener("click",function(){
+        var o={id:nid("o"),text:""}; p.options.push(o);
+        opts.insertBefore(buildOpt(p,o), add);
+      });
+      opts.appendChild(add);
+
+      var rm=document.createElement("button"); rm.className="rowrm"; rm.type="button";
+      rm.innerHTML="&times;"; rm.title="Remove sub-function";
+      rm.addEventListener("click",function(){
+        if(params.length<=1) return;
+        var i=params.indexOf(p); if(i>-1) params.splice(i,1);
+        paths.forEach(function(pa){ delete pa.sel[p.id]; });
+        renderBox(); renderCards();
+      });
+
+      row.appendChild(num); row.appendChild(pc); row.appendChild(opts); row.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
+
+  function buildOpt(p,o){
+    var el=document.createElement("div"); el.className="opt"; el.dataset.oid=o.id; el.dataset.pid=p.id;
+
+    var dot=document.createElement("button"); dot.className="dot"; dot.type="button";
+    dot.title="Assign active path to this option";
+    dot.addEventListener("click",function(){
+      var ap=active(); if(!ap) return;
+      if(ap.sel[p.id]===o.id){ delete ap.sel[p.id]; } else { ap.sel[p.id]=o.id; }
+      refreshRow(p.id); renderCards();
+    });
+
+    var tx=document.createElement("span"); tx.className="otext"; tx.contentEditable=true;
+    tx.setAttribute("data-ph","solution principle");
+    tx.textContent=o.text;
+    tx.addEventListener("input",function(){ o.text=tx.textContent; renderCards(); });
+
+    var tags=document.createElement("span"); tags.className="tags";
+
+    var rm=document.createElement("button"); rm.className="orm"; rm.type="button";
+    rm.innerHTML="&times;"; rm.title="Remove option";
+    rm.addEventListener("click",function(){
+      var i=p.options.indexOf(o); if(i>-1) p.options.splice(i,1);
+      paths.forEach(function(pa){ if(pa.sel[p.id]===o.id) delete pa.sel[p.id]; });
+      el.parentNode.removeChild(el); renderCards();
+    });
+
+    el.appendChild(dot); el.appendChild(tx); el.appendChild(tags); el.appendChild(rm);
+    applyOptState(el,p,o);
+    return el;
+  }
+
+  function applyOptState(el,p,o){
+    // tags for every path that selected this option
+    var tags=el.querySelector(".tags"); tags.innerHTML="";
+    var activeSelected=false;
+    paths.forEach(function(pa){
+      if(pa.sel[p.id]===o.id){
+        var t=document.createElement("span"); t.className="t"; t.style.background=pa.color;
+        t.textContent=pa.label; tags.appendChild(t);
+        if(pa.id===activePath) activeSelected=true;
+      }
+    });
+    if(activeSelected){ el.classList.add("sel"); el.style.setProperty("--selclr", active().color); }
+    else { el.classList.remove("sel"); el.style.removeProperty("--selclr"); }
+    // dot fill if active path sits here
+    var dot=el.querySelector(".dot");
+    if(activeSelected){ dot.style.background=active().color; dot.style.borderColor=active().color; }
+    else { dot.style.background="var(--paper)"; dot.style.borderColor="var(--steel)"; }
+  }
+
+  function refreshRow(pid){
+    var p=paramById(pid); if(!p) return;
+    var row=document.querySelector('.row[data-pid="'+pid+'"]'); if(!row) return;
+    var opts=row.querySelectorAll(".opt");
+    opts.forEach(function(el){
+      var o=null; for(var i=0;i<p.options.length;i++){ if(p.options[i].id===el.dataset.oid){o=p.options[i];break;} }
+      if(o) applyOptState(el,p,o);
+    });
+  }
+  function refreshAllSelections(){ params.forEach(function(p){ refreshRow(p.id); }); }
+
+  // ---------- render: path summary cards ----------
+  function renderCards(){
+    var wrap=document.getElementById("pathcards");
+    wrap.innerHTML="";
+    paths.forEach(function(pa){
+      var card=document.createElement("div"); card.className="pcard";
+      card.style.setProperty("--pcclr", pa.color);
+
+      var head=document.createElement("div"); head.className="pchead";
+      var nm=document.createElement("span"); nm.className="pcname"; nm.style.color=pa.color;
+      nm.textContent=pa.name||("Path "+pa.label);
+      var cnt=document.createElement("span"); cnt.className="pccount";
+      var filled=0; params.forEach(function(p){ if(pa.sel[p.id]) filled++; });
+      cnt.textContent=filled+" / "+params.length;
+      head.appendChild(nm); head.appendChild(cnt);
+
+      var tbl=document.createElement("table"); var tb=document.createElement("tbody");
+      params.forEach(function(p,idx){
+        var tr=document.createElement("tr");
+        var k=document.createElement("td"); k.className="k";
+        k.textContent=(idx+1<10?"0":"")+(idx+1)+" "+(p.name||"—");
+        var v=document.createElement("td"); v.className="v";
+        var oid=pa.sel[p.id]; var txt="";
+        if(oid){ for(var j=0;j<p.options.length;j++){ if(p.options[j].id===oid){ txt=p.options[j].text; break; } } }
+        if(txt){ v.textContent=txt; } else { v.textContent="—"; v.classList.add("unset"); }
+        tr.appendChild(k); tr.appendChild(v); tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      card.appendChild(head); card.appendChild(tbl);
+      wrap.appendChild(card);
+    });
+  }
+
+  // ---------- meta editable ----------
+  Array.prototype.forEach.call(document.querySelectorAll('.ed[data-meta]'),function(el){
+    el.addEventListener("input",function(){ meta[el.dataset.meta]=el.textContent; });
+  });
+
+  // ---------- buttons ----------
+  document.getElementById("addpath").addEventListener("click",function(){
+    addPath(); renderTabs(); renderCards();
+  });
+  document.getElementById("addrow").addEventListener("click",function(){
+    params.push({ id:nid("p"), name:"", options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}] });
+    renderBox(); renderCards();
+  });
+  document.getElementById("printbtn").addEventListener("click",function(){ window.print(); });
+  document.getElementById("resetbtn").addEventListener("click",function(){
+    paths.forEach(function(pa){ pa.sel={}; });
+    refreshAllSelections(); renderCards();
+  });
+
+  // ---------- init ----------
+  renderTabs(); renderBox(); renderCards();
+})();
+</script>
+</body>
+</html>

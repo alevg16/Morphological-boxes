@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design record — Morphological boxes · VG Engineering</title>
+<meta name="description" content="A VG Engineering working tool: build morphological boxes, keep every design in one record, trace 3–4 solution paths per problem, and hand any box to a client. Static, self-hostable on GitHub Pages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E2A4A; --navy-deep:#081B33; --ink:#0B0E13; --paper:#FFFFFF;
+    --paper-dim:#F5F7FA; --hairline:#D7DEE7; --steel:#5A7491; --focus:#1B4F8A;
+    --pA:#0E2A4A; --pB:#1F6E7A; --pC:#B5712A; --pD:#5B5470;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
+  body{font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper-dim);line-height:1.55;font-size:16px;}
+  ::selection{background:var(--navy);color:var(--paper);}
+  a{color:var(--navy);}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .sheet{max-width:1140px;margin:0 auto;background:var(--paper);border-left:1px solid var(--hairline);border-right:1px solid var(--hairline);min-height:100vh;display:flex;flex-direction:column;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);}
+
+  header{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;border-bottom:1px solid var(--hairline);}
+  .wordmark{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.02em;color:var(--ink);text-decoration:none;display:flex;align-items:baseline;gap:9px;}
+  .wordmark .vg{background:var(--navy);color:var(--paper);padding:2px 8px 3px;}
+  header .tool{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);}
+
+  .grow{flex:1 1 auto;}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.03em;border:1px solid var(--navy);background:var(--paper);color:var(--navy);padding:7px 13px;cursor:pointer;text-decoration:none;display:inline-block;}
+  .btn:hover{background:var(--navy);color:var(--paper);}
+  .btn.solid{background:var(--navy);color:var(--paper);}
+  .btn.solid:hover{background:var(--navy-deep);}
+  .btn.ghost{border-color:var(--hairline);color:var(--steel);}
+  .btn.ghost:hover{background:var(--paper-dim);color:var(--navy);border-color:var(--steel);}
+
+  /* ---- storage banner ---- */
+  .storebar{display:none;background:#FBEFE3;border-bottom:1px solid #E7C9A6;color:#7A4E1E;padding:10px 40px;font-size:13px;}
+  .storebar.show{display:block;}
+  .savedtag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.04em;}
+
+  /* ===================== LIBRARY ===================== */
+  .page-head{padding:54px 40px 30px;border-bottom:1px solid var(--hairline);}
+  .page-head h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(30px,4.4vw,46px);line-height:1.05;max-width:20ch;}
+  .page-head .lede{margin-top:16px;max-width:66ch;font-size:17px;color:#27313D;}
+  .page-head .lede strong{color:var(--ink);}
+  .libactions{padding:20px 40px;border-bottom:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .libactions .grow{flex:1 1 auto;}
+  .liblist{padding:30px 40px 50px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+  .bxcard{border:1px solid var(--hairline);border-top:3px solid var(--navy);display:flex;flex-direction:column;}
+  .bxcard .bxbody{padding:16px 18px 10px;flex:1 1 auto;}
+  .bxcard .bxname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--ink);line-height:1.2;}
+  .bxcard .bxclient{margin-top:4px;font-size:14px;color:var(--steel);}
+  .bxcard .bxmeta{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:.03em;}
+  .bxcard .bxacts{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--hairline);}
+  .bxcard .bxacts button{flex:1 1 auto;border:none;border-right:1px solid var(--hairline);background:var(--paper);color:var(--navy);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.03em;padding:9px 6px;cursor:pointer;}
+  .bxcard .bxacts button:last-child{border-right:none;}
+  .bxcard .bxacts button:hover{background:var(--paper-dim);}
+  .bxcard .bxacts button.danger:hover{background:#FBEDEC;color:#C0392B;}
+  .libempty{padding:50px 40px;color:var(--steel);font-size:15px;max-width:60ch;}
+  .helpnote{margin:0 40px 40px;border:1px solid var(--hairline);border-left:3px solid var(--navy);background:var(--paper-dim);padding:18px 22px;max-width:760px;}
+  .helpnote .label{display:block;margin-bottom:7px;color:var(--navy);}
+  .helpnote p{font-size:14px;color:#27313D;}
+  .helpnote p + p{margin-top:8px;}
+  .helpnote code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:#fff;border:1px solid var(--hairline);padding:1px 5px;}
+
+  /* ===================== EDITOR ===================== */
+  .crumb{padding:14px 40px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .crumb .back{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;color:var(--navy);background:none;border:none;cursor:pointer;}
+  .crumb .back:hover{text-decoration:underline;text-underline-offset:4px;}
+  .crumb .grow{flex:1 1 auto;}
+
+  .sharedbanner{display:none;background:var(--navy);color:#fff;padding:14px 40px;align-items:center;gap:16px;flex-wrap:wrap;}
+  .sharedbanner.show{display:flex;}
+  .sharedbanner p{font-size:14px;color:#D6E0EC;flex:1 1 auto;}
+  .sharedbanner .btn{border-color:#fff;color:#fff;}
+  .sharedbanner .btn:hover{background:#fff;color:var(--navy);}
+
+  .titleblock{display:grid;grid-template-columns:repeat(2,1fr);border-bottom:1px solid var(--hairline);}
+  .tb-cell{padding:14px 40px;border-top:1px solid var(--hairline);display:flex;flex-direction:column;gap:3px;}
+  .tb-cell:nth-child(odd){border-right:1px solid var(--hairline);}
+  .tb-cell .label{font-size:10.5px;}
+  .ed{font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;color:var(--ink);outline:none;min-height:1.5em;}
+  .ed:empty:before{content:attr(data-ph);color:#A9B4C2;}
+  .ed:focus{background:#FBFCFE;box-shadow:inset 0 -2px 0 var(--navy);}
+
+  .note{margin:22px 40px 0;border:1px solid var(--hairline);border-left:3px solid var(--navy);background:var(--paper-dim);padding:18px 22px;max-width:760px;}
+  .note .label{display:block;margin-bottom:7px;color:var(--navy);}
+  .note p{font-size:14.5px;color:#27313D;}
+  .note p + p{margin-top:9px;}
+
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 40px;border-bottom:1px solid var(--hairline);border-top:1px solid var(--hairline);margin-top:22px;background:var(--paper);position:sticky;top:0;z-index:6;}
+  .toolbar .tlabel{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);}
+  .pathtabs{display:flex;flex-wrap:wrap;gap:8px;}
+  .ptab{display:flex;align-items:center;gap:7px;border:1px solid var(--hairline);background:var(--paper);padding:6px 9px 6px 7px;cursor:pointer;user-select:none;}
+  .ptab.active{border-color:var(--navy);}
+  .ptab .sw{width:13px;height:13px;flex:none;border-radius:2px;}
+  .ptab .pname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:13.5px;outline:none;min-width:46px;}
+  .ptab .pname:focus{box-shadow:inset 0 -2px 0 currentColor;}
+  .ptab .prm{border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:13px;line-height:1;padding:0 1px;}
+  .ptab .prm:hover{color:#C0392B;}
+
+  .designspace{padding:12px 40px;background:#FBFCFE;border-bottom:1px solid var(--hairline);font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--steel);letter-spacing:.02em;}
+  .designspace b{color:var(--navy);}
+
+  .box{padding:14px 40px 16px;}
+  .row{display:flex;align-items:stretch;border:1px solid var(--hairline);border-top:none;}
+  .row.first{border-top:1px solid var(--hairline);}
+  .rownum{flex:none;width:40px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);background:var(--paper-dim);border-right:1px solid var(--hairline);}
+  .param{flex:none;width:210px;border-right:1px solid var(--hairline);padding:11px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;background:#FBFCFE;}
+  .param .pk{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);}
+  .param .ped{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:15px;color:var(--navy);outline:none;line-height:1.25;}
+  .param .ped:empty:before{content:attr(data-ph);color:#A9B4C2;font-weight:400;font-family:'IBM Plex Sans',sans-serif;font-size:13px;}
+  .param .ped:focus{box-shadow:inset 0 -2px 0 var(--navy);}
+  .opts{flex:1 1 auto;display:flex;flex-wrap:wrap;align-content:center;gap:8px;padding:10px 12px;min-width:0;}
+  .opt{display:flex;align-items:center;gap:6px;border:1px solid var(--hairline);background:var(--paper);padding:5px 7px 5px 5px;max-width:100%;}
+  .opt .dot{width:15px;height:15px;flex:none;border-radius:50%;border:1.5px solid var(--steel);background:var(--paper);cursor:pointer;padding:0;}
+  .opt .dot:hover{border-color:var(--navy);}
+  .opt .otext{font-size:13.5px;outline:none;min-width:30px;color:var(--ink);line-height:1.3;word-break:break-word;}
+  .opt .otext:empty:before{content:attr(data-ph);color:#A9B4C2;}
+  .opt .otext:focus{box-shadow:inset 0 -2px 0 var(--navy);}
+  .opt .orm{border:none;background:none;color:#B9C2CE;cursor:pointer;font-size:14px;line-height:1;padding:0 1px;flex:none;}
+  .opt .orm:hover{color:#C0392B;}
+  .opt .tags{display:flex;gap:3px;flex:none;}
+  .opt .tags .t{width:14px;height:14px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;color:#fff;}
+  .opt.sel{box-shadow:0 0 0 2px var(--selclr);border-color:var(--selclr);}
+  .addopt{border:1px dashed var(--hairline);background:none;color:var(--steel);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:6px 9px;}
+  .addopt:hover{border-color:var(--navy);color:var(--navy);}
+  .rowrm{flex:none;width:30px;border-left:1px solid var(--hairline);background:var(--paper-dim);color:#B9C2CE;cursor:pointer;font-size:15px;line-height:1;}
+  .rowrm:hover{color:#C0392B;background:#FBEDEC;}
+  .addrow-wrap{padding:0 40px 8px;}
+  .addrow{width:100%;border:1px dashed var(--hairline);background:none;color:var(--steel);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:11px;}
+  .addrow:hover{border-color:var(--navy);color:var(--navy);}
+
+  .summary{padding:40px 40px 20px;border-top:1px solid var(--hairline);margin-top:18px;}
+  .summary .label{display:block;margin-bottom:6px;}
+  .summary h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.1;color:var(--ink);}
+  .summary .sub{margin-top:7px;max-width:64ch;color:#3A4350;font-size:15px;}
+  .pathcards{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;}
+  .pcard{border:1px solid var(--hairline);border-top:3px solid var(--pcclr);display:flex;flex-direction:column;}
+  .pcard .pchead{padding:13px 15px;border-bottom:1px solid var(--hairline);display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  .pcard .pchead .pcname{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--pcclr);}
+  .pcard .pchead .pccount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--steel);}
+  .pcard table{width:100%;border-collapse:collapse;font-size:13px;}
+  .pcard td{padding:7px 15px;border-bottom:1px solid #EAEFF4;vertical-align:top;}
+  .pcard tr:last-child td{border-bottom:none;}
+  .pcard td.k{color:var(--steel);width:46%;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.02em;}
+  .pcard td.v{color:var(--ink);}
+  .pcard td.v.unset{color:#B9C2CE;}
+  .pcard .rationale{padding:12px 15px;border-top:1px solid var(--hairline);background:#FBFCFE;}
+  .pcard .rationale .label{display:block;margin-bottom:5px;color:var(--pcclr);}
+  .pcard .rationale textarea{width:100%;border:1px solid var(--hairline);background:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);padding:8px 9px;resize:vertical;min-height:62px;line-height:1.45;outline:none;}
+  .pcard .rationale textarea:focus{border-color:var(--navy);}
+
+  footer{background:var(--navy);color:#C8D4E2;padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:13px;}
+  footer .label{color:#9FB3C9;}
+  footer a{color:#C8D4E2;text-decoration:none;}
+  footer a:hover{text-decoration:underline;text-underline-offset:4px;}
+
+  @media(max-width:860px){
+    header,.page-head,.libactions,.liblist,.crumb,.toolbar,.box,.addrow-wrap,.summary,footer,.designspace,.sharedbanner,.storebar{padding-left:20px;padding-right:20px;}
+    .helpnote,.note{margin-left:20px;margin-right:20px;}
+    .tb-cell{padding-left:20px;padding-right:20px;}
+    .titleblock{grid-template-columns:1fr;}
+    .tb-cell:nth-child(odd){border-right:none;}
+    .row{flex-wrap:wrap;}
+    .param{width:auto;flex:1 1 100%;border-right:none;border-bottom:1px solid var(--hairline);}
+    .rownum{width:100%;height:26px;justify-content:flex-start;padding-left:12px;border-right:none;border-bottom:1px solid var(--hairline);}
+    .rowrm{width:100%;height:28px;border-left:none;border-top:1px solid var(--hairline);}
+  }
+
+  @media print{
+    body{background:#fff;font-size:11px;}
+    .sheet{border:none;max-width:none;}
+    .toolbar,.rowrm,.opt .orm,.opt .dot,.addopt,.addrow-wrap,.note,.btn,.ptab .prm,
+    .crumb .back,.storebar,.sharedbanner,.libactions{display:none!important;}
+    header{position:static;} .toolbar{display:none!important;}
+    .crumb{border-bottom:none;padding-top:0;}
+    .box{padding:6px 20px;}
+    .opt{padding:3px 6px;}
+    .opt.sel{box-shadow:none;border:2px solid var(--ink)!important;}
+    .summary{padding:20px;}
+    .pcard .rationale textarea{border:none;padding:0;}
+    footer{background:#fff;color:var(--steel);border-top:1px solid var(--hairline);}
+    footer .label{color:var(--steel);}
+    .pathcards{grid-template-columns:repeat(2,1fr);}
+    a[href]:after{content:"";}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <span class="wordmark"><span class="vg">VG</span> ENGINEERING</span>
+    <span class="tool">Design record · Morphological boxes</span>
+  </header>
+
+  <div class="storebar" id="storebar">
+    Preview / private-mode notice: saving to this browser is unavailable here, so changes won't persist.
+    Open the file in your own browser (or host it on GitHub Pages) to keep your work — and use <b>Export</b> for a permanent copy.
+  </div>
+
+  <!-- ===================== LIBRARY VIEW ===================== -->
+  <section id="library">
+    <div class="page-head">
+      <p class="label" style="margin-bottom:18px;">Working record · Concept generation</p>
+      <h1>Every design you've explored, in one place.</h1>
+      <p class="lede">Each entry is a morphological box for one problem: the sub-functions, every candidate solution principle, and the <strong>3–4 paths</strong> you traced through them. Build them here as a thinking tool — then export or share any box so a client can keep working on it themselves.</p>
+    </div>
+
+    <div class="libactions">
+      <button class="btn solid" id="newbox" type="button">+ New box</button>
+      <button class="btn ghost" id="importbox" type="button">Import a box (.json)</button>
+      <span class="grow"></span>
+      <button class="btn ghost" id="backupall" type="button">Back up all</button>
+      <button class="btn ghost" id="restoreall" type="button">Restore backup</button>
+    </div>
+
+    <div class="liblist" id="liblist"></div>
+    <div class="libempty" id="libempty" style="display:none;">No boxes yet. Start one with <b>+ New box</b> — it'll appear here and save automatically as you work.</div>
+
+    <div class="helpnote">
+      <span class="label">On saving — read this once</span>
+      <p>Boxes autosave to <em>this browser on this device</em>. That's convenient, not durable: clearing site data or switching machines loses them. Treat <b>Export</b> / <b>Back up all</b> as the real archive — a JSON file you keep (in your repo, in Drive, wherever). It's also how you hand a box to a client.</p>
+      <p><b>To run this from GitHub:</b> put this file in a repo as <code>index.html</code>, then Settings → Pages → deploy from <code>main</code> / root. It'll be live at <code>your-name.github.io/repo-name/</code>. No build step, nothing to install.</p>
+    </div>
+  </section>
+
+  <!-- ===================== EDITOR VIEW ===================== -->
+  <section id="editor" style="display:none;">
+    <div class="crumb">
+      <button class="back" id="backbtn" type="button">&larr; All boxes</button>
+      <span class="grow"></span>
+      <span class="savedtag" id="savedtag"></span>
+      <button class="btn ghost" id="sharebtn" type="button">Copy share link</button>
+      <button class="btn ghost" id="exportbtn" type="button">Export (.json)</button>
+      <button class="btn solid" id="printbtn" type="button">Print / Save as PDF</button>
+    </div>
+
+    <div class="sharedbanner" id="sharedbanner">
+      <p>You're viewing a <b>shared box</b>. It isn't in your record yet — edits here won't be kept unless you save a copy.</p>
+      <button class="btn" id="savecopy" type="button">Save a copy to my record</button>
+    </div>
+
+    <div class="titleblock">
+      <div class="tb-cell"><span class="label">Project / problem</span><span class="ed" contenteditable="true" data-meta="project" data-ph="One-line problem statement"></span></div>
+      <div class="tb-cell"><span class="label">Prepared for</span><span class="ed" contenteditable="true" data-meta="for" data-ph="Client / company"></span></div>
+      <div class="tb-cell"><span class="label">Prepared by</span><span class="ed" contenteditable="true" data-meta="by"></span></div>
+      <div class="tb-cell"><span class="label">Date · Ref</span><span class="ed" contenteditable="true" data-meta="ref" data-ph="YYYY-MM-DD · REF"></span></div>
+    </div>
+
+    <div class="note">
+      <span class="label">How to read it — and what it won't do</span>
+      <p>The box widens the space; it doesn't choose for you. A handful of options on each sub-function already describe thousands of combinations — most of them nonsense, and not every option is compatible with every other. The value is forcing the alternatives into the open so a path is <em>chosen against the full field</em>, not defended because it was first.</p>
+      <p>Trace a path by picking the active path (below), then clicking the dot on one option per row. Write the reasoning for each path in its summary card — that's what feeds the study's tradeoffs. Click any text to edit it.</p>
+    </div>
+
+    <div class="toolbar">
+      <span class="tlabel">Active path</span>
+      <div class="pathtabs" id="pathtabs"></div>
+      <button class="btn ghost" id="addpath" type="button">+ path</button>
+    </div>
+
+    <div class="designspace" id="designspace"></div>
+
+    <div class="box" id="box"></div>
+    <div class="addrow-wrap"><button class="addrow" id="addrow" type="button">+ add sub-function</button></div>
+
+    <div class="summary">
+      <span class="label">Path summaries</span>
+      <h2>The paths you've traced — concept seeds for the study</h2>
+      <p class="sub">Each filled path reads top to bottom as one complete concept: a chosen principle for every sub-function, plus your reasoning. Carry the strong, genuinely distinct ones into the concept study as Concept 1, 2, 3…</p>
+      <div class="pathcards" id="pathcards"></div>
+    </div>
+  </section>
+
+  <span class="grow"></span>
+  <footer>
+    <span class="label">VG Engineering · Morphological box record</span>
+    <span><a href="https://vgengineering.ch">vgengineering.ch</a></span>
+  </footer>
+
+</div>
+
+<input type="file" id="fileinput" accept="application/json,.json" style="display:none;">
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- constants ---------- */
+  var KEY="vg_morph_store_v1";
+  var COLORS=["#0E2A4A","#1F6E7A","#B5712A","#5B5470"];
+  var LABELS=["A","B","C","D"];
+  var DEFAULT_BY="Alejandro Vargas Gonzalez";
+  var uid=0; function nid(p){ uid++; return (p||"id")+Date.now().toString(36)+uid; }
+
+  /* ---------- safe storage ---------- */
+  var STORAGE_OK=(function(){ try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }catch(e){ return false; } })();
+  var mem=null;
+  function readStore(){
+    if(STORAGE_OK){ try{ var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; }catch(e){} }
+    return mem;
+  }
+  function writeStore(o){ mem=o; if(STORAGE_OK){ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} } }
+  if(!STORAGE_OK){ document.getElementById("storebar").classList.add("show"); }
+
+  /* ---------- store model ---------- */
+  function freshStore(){ return {version:1, boxes:{}, order:[]}; }
+  var store=readStore()||freshStore();
+
+  function newBox(){
+    var params=[];
+    for(var i=0;i<12;i++){ params.push({id:nid("p"),name:"",options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}]}); }
+    var paths=[];
+    for(var k=0;k<3;k++){ paths.push({id:nid("path"),label:LABELS[k],name:"Path "+LABELS[k],color:COLORS[k],rationale:"",sel:{}}); }
+    var now=Date.now();
+    return {id:nid("box"),createdAt:now,updatedAt:now,meta:{project:"",for:"",by:DEFAULT_BY,ref:""},params:params,paths:paths};
+  }
+  function addBoxToStore(box){ store.boxes[box.id]=box; store.order.unshift(box.id); persist(); }
+  function deleteBox(id){ delete store.boxes[id]; var i=store.order.indexOf(id); if(i>-1) store.order.splice(i,1); persist(); }
+
+  var saveTimer=null;
+  function persist(){
+    if(isShared) return; // shared (unsaved) boxes never touch the store
+    if(current){ current.updatedAt=Date.now(); }
+    if(saveTimer) clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){ writeStore(store); flashSaved(); },350);
+  }
+  function flashSaved(){
+    var t=document.getElementById("savedtag");
+    if(!t||isShared) return;
+    t.textContent= STORAGE_OK? "Saved ✓" : "Not saved (preview)";
+    if(STORAGE_OK){ t.style.color="#2E7D52"; setTimeout(function(){ t.style.color="var(--steel)"; t.textContent="Saved"; },900); }
+  }
+
+  /* ---------- current editing state ---------- */
+  var current=null;       // box object being edited
+  var isShared=false;     // true when loaded from a share link (not in store)
+  var activePath=null;
+
+  function pathById(id){ for(var i=0;i<current.paths.length;i++){ if(current.paths[i].id===id) return current.paths[i]; } return null; }
+  function paramById(id){ for(var i=0;i<current.params.length;i++){ if(current.params[i].id===id) return current.params[i]; } return null; }
+  function active(){ return pathById(activePath); }
+
+  /* ---------- views ---------- */
+  function showLibrary(){
+    current=null; isShared=false;
+    document.getElementById("editor").style.display="none";
+    document.getElementById("library").style.display="";
+    renderLibrary();
+  }
+  function showEditor(box,shared){
+    current=box; isShared=!!shared;
+    activePath=box.paths.length?box.paths[0].id:null;
+    document.getElementById("library").style.display="none";
+    document.getElementById("editor").style.display="";
+    document.getElementById("sharedbanner").classList.toggle("show",isShared);
+    document.getElementById("savedtag").textContent= isShared? "" : (STORAGE_OK?"Saved":"Not saved (preview)");
+    // fill meta
+    Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){
+      el.textContent = box.meta[el.dataset.meta]||"";
+    });
+    renderTabs(); renderBox(); renderCards(); updateCounter();
+    window.scrollTo(0,0);
+  }
+
+  /* ---------- library render ---------- */
+  function renderLibrary(){
+    var list=document.getElementById("liblist");
+    var empty=document.getElementById("libempty");
+    list.innerHTML="";
+    if(!store.order.length){ empty.style.display=""; return; }
+    empty.style.display="none";
+    store.order.forEach(function(id){
+      var b=store.boxes[id]; if(!b) return;
+      var card=document.createElement("div"); card.className="bxcard";
+      var body=document.createElement("div"); body.className="bxbody";
+      var nm=document.createElement("div"); nm.className="bxname"; nm.textContent=b.meta.project||"Untitled box";
+      var cl=document.createElement("div"); cl.className="bxclient"; cl.textContent=b.meta.for||"—";
+      var filled=0; b.paths.forEach(function(p){ if(Object.keys(p.sel).length) filled++; });
+      var meta=document.createElement("div"); meta.className="bxmeta";
+      meta.textContent=b.params.length+" sub-functions · "+b.paths.length+" paths · "+filled+" traced · "+fmtDate(b.updatedAt);
+      body.appendChild(nm); body.appendChild(cl); body.appendChild(meta);
+
+      var acts=document.createElement("div"); acts.className="bxacts";
+      acts.appendChild(actBtn("Open",function(){ openBox(id); }));
+      acts.appendChild(actBtn("Duplicate",function(){ duplicateBox(id); }));
+      acts.appendChild(actBtn("Export",function(){ exportBox(b); }));
+      acts.appendChild(actBtn("Link",function(){ copyShare(b); }));
+      var del=actBtn("Delete",function(){ if(confirm("Delete \""+(b.meta.project||"Untitled box")+"\"? This can't be undone.")){ deleteBox(id); renderLibrary(); } });
+      del.className="danger";
+      acts.appendChild(del);
+
+      card.appendChild(body); card.appendChild(acts);
+      list.appendChild(card);
+    });
+  }
+  function actBtn(label,fn){ var b=document.createElement("button"); b.type="button"; b.textContent=label; b.addEventListener("click",fn); return b; }
+  function fmtDate(ms){ try{ var d=new Date(ms); return d.toISOString().slice(0,10); }catch(e){ return ""; } }
+
+  /* ---------- navigation ---------- */
+  function openBox(id){ var b=store.boxes[id]; if(!b){ showLibrary(); return; } history.replaceState(null,"","#box/"+id); showEditor(b,false); }
+  function duplicateBox(id){
+    var src=store.boxes[id]; if(!src) return;
+    var copy=JSON.parse(JSON.stringify(src));
+    copy.id=nid("box"); copy.createdAt=Date.now(); copy.updatedAt=Date.now();
+    copy.meta.project=(copy.meta.project||"Untitled box")+" (copy)";
+    addBoxToStore(copy); renderLibrary();
+  }
+
+  /* ---------- path tabs ---------- */
+  function renderTabs(){
+    var wrap=document.getElementById("pathtabs"); wrap.innerHTML="";
+    current.paths.forEach(function(p){
+      var tab=document.createElement("div"); tab.className="ptab"+(p.id===activePath?" active":"");
+      if(p.id===activePath){ tab.style.borderColor=p.color; }
+      var sw=document.createElement("span"); sw.className="sw"; sw.style.background=p.color;
+      var nm=document.createElement("span"); nm.className="pname"; nm.contentEditable=true; nm.textContent=p.name; nm.style.color=p.color;
+      nm.addEventListener("input",function(){ p.name=nm.textContent; renderCards(); persist(); });
+      nm.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); nm.blur(); } });
+      nm.addEventListener("click",function(e){ e.stopPropagation(); });
+      tab.appendChild(sw); tab.appendChild(nm);
+      if(current.paths.length>1){
+        var rm=document.createElement("button"); rm.className="prm"; rm.type="button"; rm.innerHTML="&times;"; rm.title="Remove path";
+        rm.addEventListener("click",function(e){ e.stopPropagation();
+          var i=current.paths.indexOf(p); if(i>-1) current.paths.splice(i,1);
+          if(activePath===p.id) activePath=current.paths[0].id;
+          renderTabs(); refreshAllSelections(); renderCards(); persist();
+        });
+        tab.appendChild(rm);
+      }
+      tab.addEventListener("click",function(){ activePath=p.id; renderTabs(); refreshAllSelections(); });
+      wrap.appendChild(tab);
+    });
+    document.getElementById("addpath").style.display = current.paths.length>=4? "none":"";
+  }
+
+  /* ---------- box render ---------- */
+  function renderBox(){
+    var box=document.getElementById("box"); box.innerHTML="";
+    current.params.forEach(function(p,idx){
+      var row=document.createElement("div"); row.className="row"+(idx===0?" first":""); row.dataset.pid=p.id;
+      var num=document.createElement("div"); num.className="rownum"; num.textContent=(idx+1<10?"0":"")+(idx+1);
+      var pc=document.createElement("div"); pc.className="param";
+      var pk=document.createElement("div"); pk.className="pk"; pk.textContent="Sub-function";
+      var ped=document.createElement("div"); ped.className="ped"; ped.contentEditable=true; ped.setAttribute("data-ph","e.g. how the load is reacted"); ped.textContent=p.name;
+      ped.addEventListener("input",function(){ p.name=ped.textContent; renderCards(); persist(); });
+      pc.appendChild(pk); pc.appendChild(ped);
+      var opts=document.createElement("div"); opts.className="opts";
+      p.options.forEach(function(o){ opts.appendChild(buildOpt(p,o)); });
+      var add=document.createElement("button"); add.className="addopt"; add.type="button"; add.textContent="+ option";
+      add.addEventListener("click",function(){ var o={id:nid("o"),text:""}; p.options.push(o); opts.insertBefore(buildOpt(p,o),add); updateCounter(); persist(); });
+      opts.appendChild(add);
+      var rm=document.createElement("button"); rm.className="rowrm"; rm.type="button"; rm.innerHTML="&times;"; rm.title="Remove sub-function";
+      rm.addEventListener("click",function(){ if(current.params.length<=1) return;
+        var i=current.params.indexOf(p); if(i>-1) current.params.splice(i,1);
+        current.paths.forEach(function(pa){ delete pa.sel[p.id]; });
+        renderBox(); renderCards(); updateCounter(); persist();
+      });
+      row.appendChild(num); row.appendChild(pc); row.appendChild(opts); row.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
+
+  function buildOpt(p,o){
+    var el=document.createElement("div"); el.className="opt"; el.dataset.oid=o.id; el.dataset.pid=p.id;
+    var dot=document.createElement("button"); dot.className="dot"; dot.type="button"; dot.title="Assign active path to this option";
+    dot.addEventListener("click",function(){ var ap=active(); if(!ap) return;
+      if(ap.sel[p.id]===o.id){ delete ap.sel[p.id]; } else { ap.sel[p.id]=o.id; }
+      refreshRow(p.id); renderCards(); persist();
+    });
+    var tx=document.createElement("span"); tx.className="otext"; tx.contentEditable=true; tx.setAttribute("data-ph","solution principle"); tx.textContent=o.text;
+    tx.addEventListener("input",function(){ o.text=tx.textContent; renderCards(); updateCounter(); persist(); });
+    var tags=document.createElement("span"); tags.className="tags";
+    var rm=document.createElement("button"); rm.className="orm"; rm.type="button"; rm.innerHTML="&times;"; rm.title="Remove option";
+    rm.addEventListener("click",function(){ var i=p.options.indexOf(o); if(i>-1) p.options.splice(i,1);
+      current.paths.forEach(function(pa){ if(pa.sel[p.id]===o.id) delete pa.sel[p.id]; });
+      el.parentNode.removeChild(el); renderCards(); updateCounter(); persist();
+    });
+    el.appendChild(dot); el.appendChild(tx); el.appendChild(tags); el.appendChild(rm);
+    applyOptState(el,p,o);
+    return el;
+  }
+
+  function applyOptState(el,p,o){
+    var tags=el.querySelector(".tags"); tags.innerHTML=""; var activeSelected=false;
+    current.paths.forEach(function(pa){
+      if(pa.sel[p.id]===o.id){
+        var t=document.createElement("span"); t.className="t"; t.style.background=pa.color; t.textContent=pa.label; tags.appendChild(t);
+        if(pa.id===activePath) activeSelected=true;
+      }
+    });
+    if(activeSelected){ el.classList.add("sel"); el.style.setProperty("--selclr",active().color); }
+    else { el.classList.remove("sel"); el.style.removeProperty("--selclr"); }
+    var dot=el.querySelector(".dot");
+    if(activeSelected){ dot.style.background=active().color; dot.style.borderColor=active().color; }
+    else { dot.style.background="var(--paper)"; dot.style.borderColor="var(--steel)"; }
+  }
+  function refreshRow(pid){
+    var p=paramById(pid); if(!p) return;
+    var row=document.querySelector('.row[data-pid="'+pid+'"]'); if(!row) return;
+    Array.prototype.forEach.call(row.querySelectorAll(".opt"),function(el){
+      var o=null; for(var i=0;i<p.options.length;i++){ if(p.options[i].id===el.dataset.oid){o=p.options[i];break;} }
+      if(o) applyOptState(el,p,o);
+    });
+  }
+  function refreshAllSelections(){ current.params.forEach(function(p){ refreshRow(p.id); }); }
+
+  /* ---------- design-space counter ---------- */
+  function updateCounter(){
+    var product=1, filled=0;
+    current.params.forEach(function(p){
+      var n=0; p.options.forEach(function(o){ if((o.text||"").trim()) n++; });
+      if(n>0){ product*=n; filled++; }
+    });
+    var el=document.getElementById("designspace");
+    if(filled===0){ el.innerHTML="Design space · fill in options to see how large the space is · then trace 3–4 paths worth studying."; return; }
+    el.innerHTML="Design space · <b>≈ "+product.toLocaleString()+"</b> possible combinations across "+filled+" filled sub-function"+(filled>1?"s":"")+" · trace 3–4 worth studying.";
+  }
+
+  /* ---------- path summary cards ---------- */
+  function renderCards(){
+    var wrap=document.getElementById("pathcards"); wrap.innerHTML="";
+    current.paths.forEach(function(pa){
+      var card=document.createElement("div"); card.className="pcard"; card.style.setProperty("--pcclr",pa.color);
+      var head=document.createElement("div"); head.className="pchead";
+      var nm=document.createElement("span"); nm.className="pcname"; nm.style.color=pa.color; nm.textContent=pa.name||("Path "+pa.label);
+      var filled=0; current.params.forEach(function(p){ if(pa.sel[p.id]) filled++; });
+      var cnt=document.createElement("span"); cnt.className="pccount"; cnt.textContent=filled+" / "+current.params.length;
+      head.appendChild(nm); head.appendChild(cnt);
+      var tbl=document.createElement("table"); var tb=document.createElement("tbody");
+      current.params.forEach(function(p,idx){
+        var tr=document.createElement("tr");
+        var k=document.createElement("td"); k.className="k"; k.textContent=(idx+1<10?"0":"")+(idx+1)+" "+(p.name||"—");
+        var v=document.createElement("td"); v.className="v";
+        var oid=pa.sel[p.id]; var txt="";
+        if(oid){ for(var j=0;j<p.options.length;j++){ if(p.options[j].id===oid){ txt=p.options[j].text; break; } } }
+        if(txt){ v.textContent=txt; } else { v.textContent="—"; v.classList.add("unset"); }
+        tr.appendChild(k); tr.appendChild(v); tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      var rat=document.createElement("div"); rat.className="rationale";
+      var rl=document.createElement("span"); rl.className="label"; rl.style.color=pa.color; rl.textContent="Why this path · tradeoffs";
+      var ta=document.createElement("textarea"); ta.value=pa.rationale||""; ta.setAttribute("placeholder","What this combination buys you, what it costs, what to de-risk first…");
+      ta.addEventListener("input",function(){ pa.rationale=ta.value; persist(); });
+      rat.appendChild(rl); rat.appendChild(ta);
+      card.appendChild(head); card.appendChild(tbl); card.appendChild(rat);
+      wrap.appendChild(card);
+    });
+  }
+
+  /* ---------- plain-text paste for all contenteditable ---------- */
+  document.addEventListener("paste",function(e){
+    var t=e.target;
+    if(t && t.getAttribute && t.getAttribute("contenteditable")==="true"){
+      e.preventDefault();
+      var text=(e.clipboardData||window.clipboardData).getData("text/plain");
+      document.execCommand("insertText",false,text);
+    }
+  });
+
+  /* ---------- meta editing ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".ed[data-meta]"),function(el){
+    el.addEventListener("input",function(){ if(current){ current.meta[el.dataset.meta]=el.textContent; persist(); } });
+  });
+
+  /* ---------- export / import / share ---------- */
+  function toB64(str){ var bytes=new TextEncoder().encode(str), bin=""; for(var i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin); }
+  function fromB64(b64){ var bin=atob(b64), bytes=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+  function download(name,obj){
+    var blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob); var a=document.createElement("a");
+    a.href=url; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },0);
+  }
+  function safeName(b){ return (b.meta.project||"box").replace(/[^a-z0-9\-_]+/gi,"_").slice(0,40); }
+  function exportBox(b){ download("VG_morphbox_"+safeName(b)+".json",{type:"vg-morphbox",version:1,box:b}); }
+  function copyShare(b){
+    var data=toB64(JSON.stringify(b));
+    var url=location.origin+location.pathname+"#data="+data;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ alert("Share link copied to clipboard.\n\nAnyone who opens it sees this box and can save their own copy."); },function(){ prompt("Copy this share link:",url); });
+    } else { prompt("Copy this share link:",url); }
+  }
+
+  function importBoxFlow(){ pendingImport="box"; document.getElementById("fileinput").click(); }
+  function restoreAllFlow(){ if(!confirm("Restore from a backup file? This REPLACES every box currently in this browser.")) return; pendingImport="all"; document.getElementById("fileinput").click(); }
+  var pendingImport=null;
+  document.getElementById("fileinput").addEventListener("change",function(e){
+    var f=e.target.files&&e.target.files[0]; if(!f){ pendingImport=null; return; }
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var data=JSON.parse(r.result);
+        if(pendingImport==="all"){
+          if(data&&data.boxes&&data.order){ store=data; writeStore(store); renderLibrary(); alert("Backup restored."); }
+          else alert("That doesn't look like a full backup file.");
+        } else {
+          var box = data&&data.box? data.box : (data&&data.params? data : null);
+          if(box&&box.params){ box.id=nid("box"); box.createdAt=box.createdAt||Date.now(); box.updatedAt=Date.now(); if(!box.meta) box.meta={project:"",for:"",by:DEFAULT_BY,ref:""}; addBoxToStore(box); renderLibrary(); alert("Box imported."); }
+          else alert("That doesn't look like a morphological-box file.");
+        }
+      }catch(err){ alert("Couldn't read that file: "+err.message); }
+      pendingImport=null; e.target.value="";
+    };
+    r.readAsText(f);
+  });
+
+  /* ---------- buttons ---------- */
+  document.getElementById("newbox").addEventListener("click",function(){ var b=newBox(); addBoxToStore(b); openBox(b.id); });
+  document.getElementById("importbox").addEventListener("click",importBoxFlow);
+  document.getElementById("backupall").addEventListener("click",function(){ download("VG_morphbox_backup_"+fmtDate(Date.now())+".json",store); });
+  document.getElementById("restoreall").addEventListener("click",restoreAllFlow);
+  document.getElementById("backbtn").addEventListener("click",function(){ history.replaceState(null,"","#"); showLibrary(); });
+  document.getElementById("addpath").addEventListener("click",function(){ if(current.paths.length>=4) return; var n=current.paths.length; current.paths.push({id:nid("path"),label:LABELS[n],name:"Path "+LABELS[n],color:COLORS[n],rationale:"",sel:{}}); renderTabs(); renderCards(); persist(); });
+  document.getElementById("addrow").addEventListener("click",function(){ current.params.push({id:nid("p"),name:"",options:[{id:nid("o"),text:""},{id:nid("o"),text:""},{id:nid("o"),text:""}]}); renderBox(); renderCards(); updateCounter(); persist(); });
+  document.getElementById("printbtn").addEventListener("click",function(){ window.print(); });
+  document.getElementById("exportbtn").addEventListener("click",function(){ if(current) exportBox(current); });
+  document.getElementById("sharebtn").addEventListener("click",function(){ if(current) copyShare(current); });
+  document.getElementById("savecopy").addEventListener("click",function(){
+    if(!current) return;
+    var copy=JSON.parse(JSON.stringify(current)); copy.id=nid("box"); copy.createdAt=Date.now(); copy.updatedAt=Date.now();
+    isShared=false; addBoxToStore(copy); openBox(copy.id);
+  });
+
+  /* ---------- router ---------- */
+  function route(){
+    var h=location.hash||"";
+    if(h.indexOf("#data=")===0){
+      try{ var b=JSON.parse(fromB64(h.slice(6))); if(b&&b.params){ if(!b.paths) b.paths=[]; showEditor(b,true); return; } }catch(e){}
+      showLibrary(); return;
+    }
+    if(h.indexOf("#box/")===0){ var id=h.slice(5); if(store.boxes[id]){ showEditor(store.boxes[id],false); return; } }
+    showLibrary();
+  }
+  window.addEventListener("hashchange",route);
+  route();
+})();
+</script>
+</body>
+</html>
